@@ -1,0 +1,129 @@
+# 测试和调试文件
+test_*.py
+test_*.html
+test_*.js
+debug_*.py
+debug_*.html
+*_test.py
+*_test.html
+*_debug.py
+*_debug.html
+
+# 前端测试和调试文件
+frontend/*test*.html
+frontend/*debug*.html
+frontend/api_*.html
+frontend/comprehensive_*.html
+frontend/direct_*.html
+frontend/element_*.html
+frontend/quick_*.html
+frontend/real_time_*.html
+frontend/vue_*.html
+frontend/test_*.js
+
+# 临时脚本
+fix_*.py
+fix_*.bat
+create_*.py
+init_data*.py
+reset_*_password*.py
+verify_*.py
+check_*.py
+diagnose_*.py
+cleanup_*.py
+clean_*.py
+demo_*.py
+simple_*.py
+quick_*.py
+
+# 文档和报告（除了用户手册）
+*.md
+!用户手册.md
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.old
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 媒体文件备份
+media/backup/
+media/temp/
+
+# 日志文件
+logs/
+*.log
+
+# 数据库
+*.sqlite3
+*.db
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Django特有文件
+local_settings.py
+staticfiles/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# 前端构建文件
+frontend/dist/
+frontend/.vite/
+frontend/.tmp/
+frontend/coverage/
+
+# 媒体文件上传目录
+media/avatars/
+media/face_images/
+media/logos/
+
+# 敏感配置文件 - 需要手动配置
+# settings.py 中的数据库密码等信息需要使用环境变量
