@@ -17,15 +17,40 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_admin:
-            return LeaveApplication.objects.all()
+            queryset = LeaveApplication.objects.all()
         elif user.is_manager:
             # 部门经理可以看到本部门所有员工的请假申请
-            return LeaveApplication.objects.filter(
+            queryset = LeaveApplication.objects.filter(
                 user__department=user.department
             )
         else:
             # 普通员工只能看到自己的请假申请
-            return LeaveApplication.objects.filter(user=user)
+            queryset = LeaveApplication.objects.filter(user=user)
+        
+        # 支持按状态过滤
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        # 支持按用户过滤
+        user_filter = self.request.query_params.get('user')
+        if user_filter:
+            queryset = queryset.filter(user__employee_id=user_filter)
+        
+        # 支持按请假类型过滤
+        leave_type_filter = self.request.query_params.get('leave_type')
+        if leave_type_filter:
+            queryset = queryset.filter(leave_type_id=leave_type_filter)
+        
+        # 支持按日期范围过滤
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        if start_date:
+            queryset = queryset.filter(start_date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(end_date__lte=end_date)
+        
+        return queryset
     
     def perform_create(self, serializer):
         # 创建请假申请时，自动设置申请人为当前用户
