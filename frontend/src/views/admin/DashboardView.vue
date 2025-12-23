@@ -431,6 +431,8 @@ onMounted(async () => {
 <style scoped>
 .admin-dashboard {
   padding: 20px;
+  background: #f5f7fa;
+  min-height: calc(100vh - 120px);
 }
 
 .overview-section {
@@ -441,27 +443,36 @@ onMounted(async () => {
   height: 140px;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .overview-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
 .overview-card.users {
   border-left: 4px solid #409EFF;
+  background: linear-gradient(135deg, #fff 0%, #e6f4ff 100%);
 }
 
 .overview-card.departments {
   border-left: 4px solid #67C23A;
+  background: linear-gradient(135deg, #fff 0%, #f0f9e8 100%);
 }
 
 .overview-card.attendance {
   border-left: 4px solid #E6A23C;
+  background: linear-gradient(135deg, #fff 0%, #fef7e6 100%);
 }
 
 .overview-card.performance {
   border-left: 4px solid #F56C6C;
+  background: linear-gradient(135deg, #fff 0%, #fef0f0 100%);
 }
 
 .card-content {
@@ -479,8 +490,24 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   margin-right: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.overview-card.users .card-icon {
+  background: linear-gradient(135deg, #409EFF 0%, #5a7bf5 100%);
+}
+
+.overview-card.departments .card-icon {
+  background: linear-gradient(135deg, #67C23A 0%, #85ce61 100%);
+}
+
+.overview-card.attendance .card-icon {
+  background: linear-gradient(135deg, #E6A23C 0%, #f0b452 100%);
+}
+
+.overview-card.performance .card-icon {
+  background: linear-gradient(135deg, #F56C6C 0%, #f78989 100%);
 }
 
 .card-info {
@@ -513,6 +540,15 @@ onMounted(async () => {
 
 .quick-actions {
   margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.quick-actions :deep(.el-card__header) {
+  background: linear-gradient(to right, #fafbfc, #fff);
+  font-weight: 600;
+  color: #303133;
+  border-bottom: 2px solid #f0f2f5;
 }
 
 .action-item {
@@ -520,17 +556,20 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  background: #fafafa;
-  border-radius: 8px;
+  padding: 24px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  height: 100px;
+  height: 110px;
+  border: 2px solid transparent;
 }
 
 .action-item:hover {
-  background: #f0f0f0;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #409eff;
 }
 
 .action-label {

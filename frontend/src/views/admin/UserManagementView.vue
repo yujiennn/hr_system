@@ -72,7 +72,12 @@
         :data="userList"
         stripe
         v-loading="loading"
+        element-loading-text="加载中..."
+        element-loading-background="rgba(255, 255, 255, 0.8)"
+        :default-sort="{ prop: 'createTime', order: 'descending' }"
+        highlight-current-row
         @selection-change="handleSelectionChange"
+        class="user-table"
       >
         <el-table-column type="selection" width="55" />
         <el-table-column prop="avatar" label="头像" width="80">
@@ -80,23 +85,23 @@
             <el-avatar :src="row.avatar" :alt="row.username">{{ row.username.charAt(0).toUpperCase() }}</el-avatar>
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="用户名" width="120" />
-        <el-table-column prop="realName" label="真实姓名" width="120" />
-        <el-table-column prop="email" label="邮箱" width="200" show-overflow-tooltip />
+        <el-table-column prop="username" label="用户名" width="120" sortable />
+        <el-table-column prop="realName" label="真实姓名" width="120" sortable />
+        <el-table-column prop="email" label="邮箱" width="200" show-overflow-tooltip sortable />
         <el-table-column prop="phone" label="手机号" width="130" />
-        <el-table-column prop="role" label="角色" width="120">
+        <el-table-column prop="role" label="角色" width="120" sortable>
           <template #default="{ row }">
             <el-tag :type="getRoleType(row.role)">{{ getRoleText(row.role) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="department" label="部门" width="120" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="department" label="部门" width="120" sortable />
+        <el-table-column prop="status" label="状态" width="100" sortable>
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">{{ getStatusText(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="lastLogin" label="最后登录" width="160" />
-        <el-table-column prop="createTime" label="创建时间" width="160" />
+        <el-table-column prop="lastLogin" label="最后登录" width="160" sortable />
+        <el-table-column prop="createTime" label="创建时间" width="160" sortable />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="viewUser(row)">查看</el-button>
@@ -469,6 +474,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { showConfirm, showDeleteConfirm, showBatchDeleteConfirm } from '@/utils/confirm'
 import {
   Search,
   Plus,
@@ -906,9 +912,7 @@ const handleCommand = async (command: string, user: User) => {
       break
     case 'delete':
       try {
-        await ElMessageBox.confirm('确定要删除该用户吗？', '确认删除', {
-          type: 'warning'
-        })
+        await showDeleteConfirm(`用户 "${user.username}"`)
         await deleteUser(user.id)
         ElMessage.success('用户已删除')
         await getUserList()
@@ -938,8 +942,12 @@ const handleSelectionChange = (selection: User[]) => {
 // 批量启用
 const batchEnable = async () => {
   try {
-    await ElMessageBox.confirm(`确定要启用选中的 ${selectedUsers.value.length} 个用户吗？`, '批量启用', {
-      type: 'warning'
+    await showConfirm({
+      title: '批量启用用户',
+      message: `确定要启用选中的 ${selectedUsers.value.length} 个用户吗？`,
+      description: '启用后用户将可以正常登录系统。',
+      type: 'info',
+      confirmButtonText: '确认启用'
     })
     
     const promises = selectedUsers.value.map(user => activateUser(user.id))
@@ -957,8 +965,12 @@ const batchEnable = async () => {
 // 批量禁用
 const batchDisable = async () => {
   try {
-    await ElMessageBox.confirm(`确定要禁用选中的 ${selectedUsers.value.length} 个用户吗？`, '批量禁用', {
-      type: 'warning'
+    await showConfirm({
+      title: '批量禁用用户',
+      message: `确定要禁用选中的 ${selectedUsers.value.length} 个用户吗？`,
+      description: '禁用后用户将无法登录系统，但数据仍会保留。',
+      type: 'warning',
+      confirmButtonText: '确认禁用'
     })
     
     const promises = selectedUsers.value.map(user => deactivateUser(user.id))
@@ -976,11 +988,18 @@ const batchDisable = async () => {
 // 导出用户
 const exportUsers = () => {
   try {
+    const exportData = selectedUsers.value.length > 0 ? selectedUsers.value : userList.value
+    
+    if (exportData.length === 0) {
+      ElMessage.warning('没有可导出的数据')
+      return
+    }
+
     // 构建CSV数据
     const headers = ['用户名', '姓名', '邮箱', '角色', '部门', '电话', '状态', '最后登录', '创建时间']
     const csvContent = [
       headers.join(','),
-      ...userList.value.map((user: User) => [
+      ...exportData.map((user: User) => [
         user.username,
         user.realName || '',
         user.email,
@@ -997,13 +1016,15 @@ const exportUsers = () => {
     const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = `用户列表_${new Date().toISOString().slice(0, 10)}.csv`
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-')
+    const exportType = selectedUsers.value.length > 0 ? '选中用户' : '全部用户'
+    link.download = `${exportType}_${timestamp}.csv`
     link.click()
     
-    ElMessage.success('导出成功')
+    ElMessage.success(`成功导出 ${exportData.length} 条数据`)
   } catch (error) {
     console.error('导出失败:', error)
-    ElMessage.error('导出失败')
+    ElMessage.error('导出失败，请稍后重试')
   }
 }
 
@@ -1087,6 +1108,8 @@ onMounted(() => {
 
 .search-card {
   margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
@@ -1095,9 +1118,46 @@ onMounted(() => {
   align-items: center;
 }
 
+/* 表格优化样式 */
+.user-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user-table :deep(.el-table__header-wrapper) {
+  background: linear-gradient(to bottom, #f8f9fa, #f0f2f5);
+}
+
+.user-table :deep(.el-table__header th) {
+  background: transparent;
+  font-weight: 600;
+  color: #303133;
+  font-size: 14px;
+}
+
+.user-table :deep(.el-table__row) {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.user-table :deep(.el-table__row:hover) {
+  background-color: #f5f7fa !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.user-table :deep(.current-row) {
+  background-color: #ecf5ff !important;
+}
+
+.user-table :deep(.el-table__body-wrapper) {
+  min-height: 400px;
+}
+
 .pagination-container {
   margin-top: 20px;
   text-align: right;
+  padding: 16px 0;
 }
 
 .user-detail {

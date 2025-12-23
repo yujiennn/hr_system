@@ -1,3 +1,147 @@
 @import './base.css';
 
-/* 移除所有限制性样式，让组件自己控制布局 */
+/* 全局过渡动画 */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* 卡片通用样式 */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* 页面标题样式 */
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #409eff;
+}
+
+/* 统一按钮样式增强 */
+.el-button--primary {
+  background: linear-gradient(135deg, #409eff 0%, #5a7bf5 100%);
+  border: none;
+}
+
+.el-button--primary:hover {
+  background: linear-gradient(135deg, #66b1ff 0%, #7e9bf7 100%);
+}
+
+/* 表格样式优化 */
+.el-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.el-table th {
+  background: linear-gradient(to bottom, #f5f7fa, #ebeef5) !important;
+  font-weight: 600;
+}
+
+/* 表单样式优化 */
+.el-form {
+  margin-top: 20px;
+}
+
+/* Element Plus 组件样式增强 */
+.el-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.el-card__header {
+  background: linear-gradient(to right, #fafbfc, #fff);
+  border-bottom: 2px solid #f0f2f5;
+  font-weight: 600;
+}
+
+/* 自定义确认对话框样式 */
+.custom-confirm-dialog .el-message-box {
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.custom-confirm-dialog .el-message-box__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-confirm-dialog .el-message-box__content {
+  padding: 30px 24px;
+}
+
+.danger-confirm-dialog .el-message-box {
+  border-top: 3px solid #f56c6c;
+}
+
+/* 加载动画优化 */
+.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 分页样式优化 */
+.el-pagination {
+  margin-top: 20px;
+  padding: 16px 0;
+}
+
+/* 工具类 */
+.flex {
+  display: flex;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .card {
+    padding: 15px;
+  }
+  
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .el-card__header {
+    padding: 12px 16px;
+  }
+}

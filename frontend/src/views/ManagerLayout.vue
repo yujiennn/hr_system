@@ -152,13 +152,14 @@ const getBreadcrumbTitle = () => {
 }
 
 .header {
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%);
+  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-left {
@@ -170,13 +171,15 @@ const getBreadcrumbTitle = () => {
   width: 32px;
   height: 32px;
   margin-right: 12px;
+  filter: brightness(0) invert(1);
 }
 
 .title {
   margin: 0;
   font-size: 20px;
-  color: #303133;
-  font-weight: 600;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-right {
@@ -188,63 +191,81 @@ const getBreadcrumbTitle = () => {
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: background-color 0.3s;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-info:hover {
-  background-color: #f5f7fa;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .username {
   margin: 0 8px;
-  color: #303133;
+  color: #fff;
+  font-weight: 500;
+}
+
+.user-info .el-icon {
+  color: #fff;
 }
 
 .sidebar {
-  background: #304156;
+  background: linear-gradient(180deg, #304156 0%, #263445 100%);
   border-right: none;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-menu {
   border-right: none;
-  background: #304156;
+  background: transparent;
 }
 
 .sidebar-menu :deep(.el-menu-item) {
   color: #bfcbd9;
-  border-bottom: 1px solid #263445;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  margin: 4px 8px;
+  border-radius: 8px;
 }
 
 .sidebar-menu :deep(.el-menu-item:hover) {
-  background-color: #263445;
-  color: #409EFF;
+  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%);
+  color: #fff;
+  transform: translateX(4px);
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background-color: #409EFF !important;
+  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%) !important;
   color: #fff;
+  box-shadow: 0 4px 12px rgba(19, 194, 194, 0.4);
 }
 
 .sidebar-menu :deep(.el-sub-menu__title) {
   color: #bfcbd9;
-  border-bottom: 1px solid #263445;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  margin: 4px 8px;
+  border-radius: 8px;
 }
 
 .sidebar-menu :deep(.el-sub-menu__title:hover) {
-  background-color: #263445;
-  color: #409EFF;
+  background: rgba(19, 194, 194, 0.2);
+  color: #fff;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item) {
-  background-color: #1e2d3d;
-  border-bottom: 1px solid #263445;
+  background-color: rgba(30, 45, 61, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 2px 8px;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item:hover) {
-  background-color: #263445;
-  color: #409EFF;
+  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%);
+  color: #fff;
+  transform: translateX(4px);
 }
 
 .main-content {

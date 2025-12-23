@@ -7,6 +7,9 @@
           <h1 class="title">智慧员工运营系统 - 系统管理员</h1>
         </div>
         <div class="header-right">
+          <!-- 通知中心 -->
+          <NotificationCenter ref="notificationRef" />
+          
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-avatar :size="32" :src="userStore.user?.avatar">
@@ -86,10 +89,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/counter'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import NotificationCenter from '@/components/NotificationCenter.vue'
 import {
   User,
   ArrowDown,
@@ -102,6 +106,7 @@ import {
 
 const router = useRouter()
 const userStore = useAuthStore()
+const notificationRef = ref()
 
 // 确保用户信息已加载
 onMounted(async () => {
@@ -153,13 +158,14 @@ const getBreadcrumbTitle = () => {
 }
 
 .header {
-  background: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-left {
@@ -171,13 +177,15 @@ const getBreadcrumbTitle = () => {
   width: 32px;
   height: 32px;
   margin-right: 12px;
+  filter: brightness(0) invert(1);
 }
 
 .title {
   margin: 0;
   font-size: 20px;
-  color: #303133;
-  font-weight: 600;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-right {
@@ -189,67 +197,85 @@ const getBreadcrumbTitle = () => {
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: background-color 0.3s;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-info:hover {
-  background-color: #f5f7fa;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .username {
   margin: 0 8px;
-  color: #303133;
+  color: #fff;
+  font-weight: 500;
+}
+
+.user-info .el-icon {
+  color: #fff;
 }
 
 .sidebar {
-  background: #001529;
+  background: linear-gradient(180deg, #001529 0%, #002140 100%);
   border-right: none;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-menu {
   border-right: none;
-  background: #001529;
+  background: transparent;
 }
 
 .sidebar-menu :deep(.el-menu-item) {
-  color: rgba(255, 255, 255, 0.65);
-  border-bottom: 1px solid #002140;
+  color: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  margin: 4px 8px;
+  border-radius: 8px;
 }
 
 .sidebar-menu :deep(.el-menu-item:hover) {
-  background-color: #1890ff;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
   color: #fff;
+  transform: translateX(4px);
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background-color: #1890ff !important;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%) !important;
   color: #fff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 }
 
 .sidebar-menu :deep(.el-sub-menu__title) {
-  color: rgba(255, 255, 255, 0.65);
-  border-bottom: 1px solid #002140;
+  color: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  margin: 4px 8px;
+  border-radius: 8px;
 }
 
 .sidebar-menu :deep(.el-sub-menu__title:hover) {
-  background-color: #1890ff;
+  background: rgba(24, 144, 255, 0.2);
   color: #fff;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item) {
-  background-color: #000c17;
-  border-bottom: 1px solid #002140;
+  background-color: rgba(0, 12, 23, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin: 2px 8px;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item:hover) {
-  background-color: #1890ff;
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
   color: #fff;
+  transform: translateX(4px);
 }
 
 .main-content {
-  background: #f0f2f5;
+  background: #f5f7fa;
   padding: 0;
   flex: 1;
   overflow-y: auto;
@@ -257,9 +283,15 @@ const getBreadcrumbTitle = () => {
 }
 
 .breadcrumb {
-  background: #fff;
+  background: linear-gradient(to right, #fff, #fafbfc);
   padding: 16px 24px;
-  border-bottom: 1px solid #e6e6e6;
-  margin-bottom: 16px;
+  border-bottom: 1px solid #e8eaed;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.breadcrumb :deep(.el-breadcrumb__inner) {
+  color: #606266;
+  font-weight: 500;
 }
 </style>

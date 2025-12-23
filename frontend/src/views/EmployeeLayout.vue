@@ -127,12 +127,13 @@ const handleCommand = async (command: string) => {
 }
 
 .header {
-  background: #409eff;
+  background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
   color: white;
   display: flex;
   align-items: center;
   padding: 0 20px;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-content {
@@ -145,35 +146,69 @@ const handleCommand = async (command: string) => {
 .header-content h2 {
   margin: 0;
   font-size: 20px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .avatar {
   width: 32px;
   height: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .username {
   font-size: 14px;
+  font-weight: 500;
 }
 
 .sidebar {
-  background: #f5f5f5;
-  border-right: 1px solid #e6e6e6;
+  background: linear-gradient(180deg, #f5f7fa 0%, #e8eaed 100%);
+  border-right: 1px solid #d9dce0;
 }
 
 .sidebar-menu {
   border: none;
   height: 100%;
+  background: transparent;
+}
+
+.sidebar-menu :deep(.el-menu-item) {
+  margin: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.sidebar-menu :deep(.el-menu-item:hover) {
+  background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active) {
+  background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(250, 140, 22, 0.4);
 }
 
 .main-content {
-  background: #f0f2f5;
+  background: #f5f7fa;
   padding: 20px;
   flex: 1;
   overflow-y: auto;
