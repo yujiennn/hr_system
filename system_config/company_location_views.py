@@ -1,10 +1,29 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
 from .models import CompanyLocation
 from .serializers import CompanyLocationSerializer
 import math
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class IsAdminUser(permissions.BasePermission):
+    """
+    自定义权限类：只允许管理员用户
+    """
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        
+        # 检查是否为管理员
+        is_admin = user.is_superuser or (hasattr(user, 'user_type') and user.user_type == 'admin')
+        logger.debug(f"IsAdminUser.has_permission - User: {user.username}, is_superuser: {user.is_superuser}, user_type: {getattr(user, 'user_type', 'N/A')}, is_admin: {is_admin}")
+        return is_admin
 
 
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -33,41 +52,43 @@ class CompanyLocationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None  # 禁用分页
     
+    def get_permissions(self):
+        """
+        根据不同的 action 设置权限
+        """
+        if self.action in ['list', 'retrieve', 'validate_location', 'nearest']:
+            # 列表、详情、验证位置、最近位置操作只需要认证
+            permission_classes = [permissions.IsAuthenticated]
+        else:
+            # 创建、更新、删除操作需要管理员权限
+            permission_classes = [IsAdminUser]
+        
+        return [permission() for permission in permission_classes]
+    
     def get_queryset(self):
-        # 检查用户是否为管理员
-        is_admin = (
-            self.request.user.user_type == 'admin' or 
-            self.request.user.is_superuser or 
-            self.request.user.is_staff
-        )
+        # 根据用户权限返回不同的数据
+        user = self.request.user
+        is_admin = user.is_superuser or (hasattr(user, 'user_type') and user.user_type == 'admin')
         
         if self.action in ['list', 'retrieve']:
             if is_admin:
                 # 管理员可以查看所有位置
                 return CompanyLocation.objects.all()
             else:
-                # 普通用户和员工只能查看启用的位置
+                # 普通用户只能查看启用的位置
                 return CompanyLocation.objects.filter(is_active=True)
         else:
-            # 只有管理员可以进行增删改操作
-            if is_admin:
-                return CompanyLocation.objects.all()
-            else:
-                return CompanyLocation.objects.none()
+            # 对于修改操作，管理员可以访问所有数据
+            # （权限检查已在权限类中进行）
+            return CompanyLocation.objects.all()
     
     def perform_create(self, serializer):
-        if not (self.request.user.user_type == 'admin' or self.request.user.is_superuser):
-            raise permissions.PermissionDenied("只有管理员可以创建公司位置")
         serializer.save(created_by=self.request.user)
     
     def perform_update(self, serializer):
-        if not (self.request.user.user_type == 'admin' or self.request.user.is_superuser):
-            raise permissions.PermissionDenied("只有管理员可以修改公司位置")
         serializer.save()
     
     def perform_destroy(self, instance):
-        if not (self.request.user.user_type == 'admin' or self.request.user.is_superuser):
-            raise permissions.PermissionDenied("只有管理员可以删除公司位置")
         super().perform_destroy(instance)
     
     @action(detail=False, methods=['post'])

@@ -227,6 +227,18 @@
                   />
                 </div>
               </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>所属部门 *</label>
+                  <select v-model="editForm.department" required>
+                    <option disabled value="">请选择部门</option>
+                    <option v-for="dept in departmentList" :key="dept.id" :value="dept.id">
+                      {{ dept.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
               
               <div class="form-row" v-if="!editForm.id">
                 <div class="form-group">
@@ -689,7 +701,15 @@ const getUserList = async () => {
 const getDepartments = async () => {
   try {
     const response = await getDepartmentList()
-    departmentList.value = response
+    // 兼容返回结构：可能是数组、或 {results: [...]}
+    if (Array.isArray(response)) {
+      departmentList.value = response
+    } else if (Array.isArray(response?.results)) {
+      departmentList.value = response.results
+    } else {
+      departmentList.value = []
+      console.warn('部门列表返回格式异常，已置为空数组', response)
+    }
   } catch (error: any) {
     console.error('获取部门列表失败:', error)
     ElMessage.error('获取部门列表失败')
@@ -777,6 +797,10 @@ const validateForm = () => {
   
   if (!editForm.user_type) {
     errors.push('用户角色不能为空')
+  }
+
+  if (!editForm.department) {
+    errors.push('所属部门不能为空')
   }
   
   // 新增用户时验证密码

@@ -84,19 +84,22 @@ class LocationService {
   // 创建公司位置
   async createCompanyLocation(locationData: Omit<CompanyLocation, 'id' | 'created_at'>): Promise<{ success: boolean; data: CompanyLocation }> {
     const response = await api.post('/system/company-locations/', locationData)
-    return response.data
+    const data = response.data?.data ?? response.data
+    return { success: true, data }
   }
 
   // 更新公司位置
   async updateCompanyLocation(id: number, locationData: Partial<CompanyLocation>): Promise<{ success: boolean; data: CompanyLocation }> {
     const response = await api.put(`/system/company-locations/${id}/`, locationData)
-    return response.data
+    const data = response.data?.data ?? response.data
+    return { success: true, data }
   }
 
   // 删除公司位置
   async deleteCompanyLocation(id: number): Promise<{ success: boolean }> {
     const response = await api.delete(`/system/company-locations/${id}/`)
-    return response.data
+    const data = response.data?.success ?? true
+    return { success: data }
   }
 
   // 获取用户当前位置

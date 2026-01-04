@@ -97,8 +97,8 @@
               <el-col :span="12">
                 <el-form-item label="性别">
                   <el-select v-model="profileForm.gender" placeholder="请选择性别">
-                    <el-option label="男" value="male" />
-                    <el-option label="女" value="female" />
+                    <el-option label="男" value="M" />
+                    <el-option label="女" value="F" />
                   </el-select>
                 </el-form-item>
               </el-col>

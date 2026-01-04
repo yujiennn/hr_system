@@ -7,6 +7,15 @@ from django.db import transaction
 from django.db.models import Sum
 from .models import LeaveApplication, LeaveType, LeaveBalance
 from .serializers import LeaveApplicationSerializer, LeaveTypeSerializer, LeaveBalanceSerializer, LeaveApprovalSerializer
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def can_approve_leave(user):
+    """检查用户是否有权限审批请假"""
+    # 支持 superuser 或 user_type 为 admin 或 manager
+    return user.is_superuser or getattr(user, 'is_admin', False) or getattr(user, 'is_manager', False)
 
 
 class LeaveApplicationViewSet(viewsets.ModelViewSet):
@@ -61,10 +70,14 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
         leave_application = self.get_object()
         serializer = LeaveApprovalSerializer(data=request.data)
         
+        logger.debug(f"approve - User: {request.user.username}, user_type: {getattr(request.user, 'user_type', 'N/A')}")
+        
         if serializer.is_valid():
             # 只有管理员和部门经理能审批
             user = request.user
-            if not (user.is_admin or user.is_manager):
+            
+            if not can_approve_leave(user):
+                logger.warning(f"approve - Permission denied for user: {user.username}")
                 return Response({'error': '你没有权限进行审批'}, status=status.HTTP_403_FORBIDDEN)
             
             # 检查申请状态
@@ -199,9 +212,12 @@ class ApproveLeaveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
+        logger.debug(f"ApproveLeaveView.post - User: {request.user.username}, user_type: {getattr(request.user, 'user_type', 'N/A')}")
+        
         # 只有管理员和部门经理能审批
         user = request.user
-        if not (user.is_admin or user.is_manager):
+        if not can_approve_leave(user):
+            logger.warning(f"ApproveLeaveView.post - Permission denied for user: {user.username}")
             return Response({'error': '你没有权限进行审批'}, status=status.HTTP_403_FORBIDDEN)
         
         try:

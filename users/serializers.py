@@ -12,6 +12,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
+    avatar = serializers.ImageField(required=False, allow_null=True)
     
     class Meta:
         model = User
@@ -23,6 +24,17 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active_employee', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def to_representation(self, instance):
+        """序列化时返回完整的avatar URL"""
+        ret = super().to_representation(instance)
+        if instance.avatar:
+            request = self.context.get('request')
+            if request:
+                ret['avatar'] = request.build_absolute_uri(instance.avatar.url)
+            else:
+                ret['avatar'] = f"http://127.0.0.1:8000{instance.avatar.url}"
+        return ret
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -93,6 +105,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
+    avatar = serializers.ImageField(required=False, allow_null=True)
     
     class Meta:
         model = User
@@ -104,3 +117,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             'education', 'major', 'university', 'work_experience', 'skills', 'bio'
         ]
         read_only_fields = ['id', 'username', 'employee_id', 'user_type', 'department']
+    
+    def to_representation(self, instance):
+        """序列化时返回完整的avatar URL"""
+        ret = super().to_representation(instance)
+        if instance.avatar:
+            request = self.context.get('request')
+            if request:
+                ret['avatar'] = request.build_absolute_uri(instance.avatar.url)
+            else:
+                ret['avatar'] = f"http://127.0.0.1:8000{instance.avatar.url}"
+        return ret

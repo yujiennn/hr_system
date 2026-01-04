@@ -138,7 +138,7 @@ class SalaryService {  // 获取薪资记录列表
 
   // 导出单个员工工资单
   async exportSingleSalary(salaryId: number) {
-    const response = await api.get(`/salary/${salaryId}/export/`, {
+    const response = await api.get(`/salary/records/${salaryId}/export/`, {
       responseType: 'blob'
     })
     

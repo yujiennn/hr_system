@@ -460,6 +460,20 @@ const updateUploadHeaders = () => {
 // 配置映射对象，用于存储从API获取的配置
 const configMap = ref<Map<string, SystemConfig>>(new Map())
 
+const normalizeBoolean = (value: any): boolean => {
+  if (typeof value === 'boolean') return value
+  if (value === null || value === undefined) return false
+  const normalized = String(value).trim().toLowerCase()
+  return normalized === 'true' || normalized === '1' || normalized === 'yes'
+}
+
+// 缺省需要存在的配置项（避免因数据库未初始化导致开关无效）
+const requiredConfigs = [
+  { key: 'enable_location', config_type: 'attendance', description: '启用地理位置', value: 'false' },
+  { key: 'location_range', config_type: 'attendance', description: '打卡范围(米)', value: '200' },
+  { key: 'enable_face_recognition', config_type: 'attendance', description: '启用人脸识别', value: 'false' },
+]
+
 // 基础配置
 const basicConfig = reactive({
   systemName: '',
@@ -569,6 +583,13 @@ const loadConfigs = async () => {
     const configs = await systemConfigService.getAllConfigs()
     console.log('🔥 获取到的配置:', configs)
     console.log('🔥 配置数量:', configs.length)
+
+    // 若数据库缺少关键配置项（如启用地理位置/人脸识别），先补全再重新加载
+    const created = await ensureRequiredConfigs(configs)
+    if (created) {
+      console.log('🔥 已补全缺失的配置，重新加载一次...')
+      return await loadConfigs()
+    }
     
     // 将配置存储到映射对象中
     configMap.value.clear()
@@ -589,6 +610,17 @@ const loadConfigs = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// 确保关键配置存在，若缺失则创建默认值
+const ensureRequiredConfigs = async (configs: SystemConfig[]): Promise<boolean> => {
+  const existingKeys = new Set(configs.map(c => c.key))
+  const missing = requiredConfigs.filter(cfg => !existingKeys.has(cfg.key))
+  if (missing.length === 0) return false
+
+  console.warn('检测到缺失配置项，准备创建:', missing.map(m => m.key))
+  await Promise.all(missing.map(cfg => systemConfigService.createConfig(cfg)))
+  return true
 }
 
 // 将API配置映射到前端数据结构
@@ -643,40 +675,40 @@ const mapConfigsToFrontend = (configs: SystemConfig[]) => {
         attendanceConfig.workDays = value ? value.split(',') : ['1', '2', '3', '4', '5']
         break
       case 'enable_location':
-        attendanceConfig.enableLocation = value === 'true'
+        attendanceConfig.enableLocation = normalizeBoolean(value)
         break
       case 'location_range':
         attendanceConfig.locationRange = parseInt(value) || 200
         break
       case 'enable_face_recognition':
-        attendanceConfig.enableFaceRecognition = value === 'true'
+        attendanceConfig.enableFaceRecognition = normalizeBoolean(value)
         break
       
       // 通知配置
       case 'notification_enabled':
       case 'inapp_notification':
-        notificationConfig.enableInApp = value === 'true'
+        notificationConfig.enableInApp = normalizeBoolean(value)
         break
       case 'email_notification':
-        notificationConfig.enableEmail = value === 'true'
+        notificationConfig.enableEmail = normalizeBoolean(value)
         break
       case 'sms_notification':
-        notificationConfig.enableSMS = value === 'true'
+        notificationConfig.enableSMS = normalizeBoolean(value)
         break
       case 'attendance_alert':
-        notificationConfig.attendanceAlert = value === 'true'
+        notificationConfig.attendanceAlert = normalizeBoolean(value)
         break
       case 'leave_approval_alert':
-        notificationConfig.leaveApprovalAlert = value === 'true'
+        notificationConfig.leaveApprovalAlert = normalizeBoolean(value)
         break
       case 'salary_alert':
-        notificationConfig.salaryAlert = value === 'true'
+        notificationConfig.salaryAlert = normalizeBoolean(value)
         break
       case 'birthday_reminder':
-        notificationConfig.birthdayReminder = value === 'true'
+        notificationConfig.birthdayReminder = normalizeBoolean(value)
         break
       case 'contract_expire_reminder':
-        notificationConfig.contractExpireReminder = value === 'true'
+        notificationConfig.contractExpireReminder = normalizeBoolean(value)
         break
       case 'reminder_days':
         notificationConfig.reminderDays = parseInt(value) || 7
@@ -684,7 +716,7 @@ const mapConfigsToFrontend = (configs: SystemConfig[]) => {
       
       // 系统维护
       case 'maintenance_mode':
-        maintenanceConfig.isMaintenanceMode = value === 'true'
+        maintenanceConfig.isMaintenanceMode = normalizeBoolean(value)
         break
       case 'maintenance_message':
         maintenanceConfig.maintenanceMessage = value

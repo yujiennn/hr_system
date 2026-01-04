@@ -320,6 +320,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, nextTick, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import {
@@ -332,6 +333,7 @@ import GoalApproval from '@/components/GoalApproval.vue'
 
 // Tab 控制
 const activeTab = ref('evaluation')
+const route = useRoute()
 import performanceService from '../../services/performance'
 import type { PerformanceEvaluation as BackendEvaluation } from '../../services/performance'
 
@@ -1018,6 +1020,11 @@ onMounted(async () => {
   
   // 加载员工选项
   await loadEmployeeOptions()
+
+   // 如果从员工列表跳转，使用路由查询参数预筛选员工
+  if (typeof route.query.employee_id === 'string' && !Number.isNaN(Number(route.query.employee_id))) {
+    filterForm.employeeId = Number(route.query.employee_id)
+  }
   
   // 加载评估列表
   await searchEvaluations()

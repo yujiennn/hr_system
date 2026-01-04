@@ -441,6 +441,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -503,6 +504,7 @@ const salaryRecords = ref<SalaryRecord[]>([])
 const departmentEmployees = ref<DepartmentEmployee[]>([])
 const statistics = ref<SalaryStatistics | null>(null)
 const selectedSalary = ref<SalaryRecord | null>(null)
+const route = useRoute()
 
 // 搜索表单
 const searchForm = reactive({
@@ -795,6 +797,17 @@ const handleCurrentChange = (val: number) => {
 
 // 初始化
 onMounted(() => {
+  // 从路由查询中预填筛选条件，便于从员工列表跳转
+  const { employee_id, year, month } = route.query
+  if (typeof employee_id === 'string') {
+    searchForm.employeeId = employee_id
+  }
+  if (typeof year === 'string' && !Number.isNaN(Number(year))) {
+    searchForm.year = Number(year)
+  }
+  if (typeof month === 'string' && !Number.isNaN(Number(month))) {
+    searchForm.month = Number(month)
+  }
   loadDepartmentEmployees()
   loadSalaryRecords()
 })

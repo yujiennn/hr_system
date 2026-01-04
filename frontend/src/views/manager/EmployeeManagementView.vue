@@ -95,7 +95,6 @@
                 <el-dropdown-menu>
                   <el-dropdown-item command="performance">绩效评估</el-dropdown-item>
                   <el-dropdown-item command="salary">薪资调整</el-dropdown-item>
-                  <el-dropdown-item command="transfer">部门调动</el-dropdown-item>
                   <el-dropdown-item command="deactivate" divided>离职处理</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -229,6 +228,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -252,6 +252,7 @@ import { useAuthStore } from '@/stores/counter'
 
 // 使用用户状态管理
 const authStore = useAuthStore()
+const router = useRouter()
 
 // 接口定义
 interface Employee {
@@ -481,13 +482,18 @@ const resetForm = () => {
 const handleCommand = async (command: string, employee: Employee) => {
   switch (command) {
     case 'performance':
-      ElMessage.info('跳转到绩效评估页面')
+      // 携带员工ID跳转绩效页面并让目标页读取查询参数进行预筛选
+      router.push({
+        path: '/manager/performance',
+        query: { employee_id: employee.id.toString() }
+      })
       break
     case 'salary':
-      ElMessage.info('跳转到薪资调整页面')
-      break
-    case 'transfer':
-      ElMessage.info('跳转到部门调动页面')
+      // 携带工号跳转薪资管理页，目标页会按 employee_id 查询
+      router.push({
+        path: '/manager/salary',
+        query: { employee_id: employee.employeeId }
+      })
       break
     case 'deactivate':
       try {

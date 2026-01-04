@@ -126,21 +126,42 @@ class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        serializer = ProfileSerializer(request.user)
+        serializer = ProfileSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.debug(f"ProfileView.put - User: {request.user.username}")
+        logger.debug(f"ProfileView.put - Request data keys: {request.data.keys()}")
+        logger.debug(f"ProfileView.put - Request files keys: {request.FILES.keys()}")
+        
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
+            logger.debug(f"ProfileView.put - Serializer is valid, saving...")
             serializer.save()
+            logger.debug(f"ProfileView.put - Data saved successfully")
             return Response(serializer.data)
+        
+        logger.error(f"ProfileView.put - Serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request):
-        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.debug(f"ProfileView.patch - User: {request.user.username}")
+        logger.debug(f"ProfileView.patch - Request data keys: {request.data.keys()}")
+        
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
+            logger.debug(f"ProfileView.patch - Serializer is valid, saving...")
             serializer.save()
+            logger.debug(f"ProfileView.patch - Data saved successfully")
             return Response(serializer.data)
+        
+        logger.error(f"ProfileView.patch - Serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
