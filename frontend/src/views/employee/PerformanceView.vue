@@ -28,6 +28,46 @@
       </el-form>
     </el-card>
 
+    <!-- 流程指引 -->
+    <el-card class="process-guide" v-if="latestEvaluation">
+      <template #header>
+        <div class="process-header">
+          <span>📋 绩效评估进度</span>
+        </div>
+      </template>
+      <el-steps :active="getCurrentStep()" align-center>
+        <el-step title="目标设定" :status="getStepStatus('goal')">
+          <template #description>
+            <span v-if="getStepStatus('goal') === 'finish'">已完成</span>
+            <span v-else-if="getStepStatus('goal') === 'process'">等待经理批准</span>
+          </template>
+        </el-step>
+        <el-step title="自我评估" :status="getStepStatus('self_eval')">
+          <template #description>
+            <span v-if="getStepStatus('self_eval') === 'finish'">已完成</span>
+            <span v-else-if="getStepStatus('self_eval') === 'process'">进行中</span>
+            <span v-else>等待目标批准</span>
+          </template>
+        </el-step>
+        <el-step title="上级评估" :status="getStepStatus('manager_eval')">
+          <template #description>
+            <span v-if="getStepStatus('manager_eval') === 'finish'">已完成</span>
+            <span v-else-if="getStepStatus('manager_eval') === 'process'">待处理</span>
+            <span v-else>等待自评完成</span>
+          </template>
+        </el-step>
+        <el-step title="评估完成" :status="getStepStatus('complete')">
+          <template #description>
+            <span v-if="getStepStatus('complete') === 'finish'">已完成</span>
+            <span v-else>待完成</span>
+          </template>
+        </el-step>
+      </el-steps>
+
+      <!-- 下一步操作提示 -->
+      <el-alert v-if="nextActionText" :title="nextActionText" type="info" :closable="false" style="margin-top: 16px" />
+    </el-card>
+
     <!-- 最新绩效概览 -->
     <el-card class="latest-performance" v-if="latestEvaluation">
       <template #header>
@@ -116,7 +156,7 @@
                   详情
                 </el-button>
                 <el-button 
-                  v-if="performanceService.canSelfEvaluate(row)" 
+                  v-if="performanceService.canSelfEvaluate(row, currentUserId)" 
                   type="warning" 
                   size="small" 
                   @click="startSelfEvaluation(row)"
@@ -423,10 +463,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, nextTick } from 'vue'
+import { ref, reactive, onMounted, onActivated, computed, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import * as echarts from 'echarts'
 import performanceService from '../../services/performance'
+import { useAuthStore } from '@/stores/counter'
 import type { 
   PerformanceEvaluation, 
   PerformancePeriod, 
@@ -434,6 +475,10 @@ import type {
   PerformanceGoal,
   PerformanceStatistics
 } from '../../services/performance'
+
+// 获取当前用户信息
+const authStore = useAuthStore()
+const currentUserId = computed(() => authStore.user?.id)
 
 // 类型定义
 interface FilterForm {
@@ -595,6 +640,73 @@ const loadStatistics = async () => {
   }
 }
 
+// 流程计算方法
+const getCurrentStep = (): number => {
+  if (!latestEvaluation.value) return 0
+  const status = latestEvaluation.value.status
+  
+  // 返回当前进度（0-3）
+  // 注意：PerformanceEvaluation 只有这些状态：draft | self_evaluated | manager_evaluated | finalized
+  if (status === 'draft') return 0
+  if (status === 'self_evaluated') return 1
+  if (status === 'manager_evaluated') return 2
+  if (status === 'finalized') return 3
+  return 0
+}
+
+const getStepStatus = (step: string): string => {
+  if (!latestEvaluation.value) return 'wait'
+  const status = latestEvaluation.value.status as 'draft' | 'self_evaluated' | 'manager_evaluated' | 'finalized'
+  
+  switch (step) {
+    case 'goal':
+      // 目标设定完成：从 draft 到 manager_evaluated 及以后
+      if (status === 'draft') return 'process'
+      if (['self_evaluated', 'manager_evaluated', 'finalized'].includes(status)) return 'finish'
+      return 'wait'
+      
+    case 'self_eval':
+      // 自评：从 draft 到 finalized
+      if (status === 'draft') return 'wait'
+      if (status === 'self_evaluated' || status === 'manager_evaluated' || status === 'finalized') return 'process'
+      if (status === 'finalized') return 'finish'
+      return 'wait'
+      
+    case 'manager_eval':
+      // 经理评估：从 self_evaluated 到 finalized
+      if (status === 'self_evaluated' || status === 'manager_evaluated') return 'process'
+      if (status === 'finalized') return 'finish'
+      return 'wait'
+      
+    case 'complete':
+      // 完成：finalized
+      if (status === 'finalized') return 'finish'
+      return 'wait'
+      
+    default:
+      return 'wait'
+  }
+}
+
+const nextActionText = computed(() => {
+  if (!latestEvaluation.value) return ''
+  
+  const status = latestEvaluation.value.status as 'draft' | 'self_evaluated' | 'manager_evaluated' | 'finalized'
+  
+  switch (status) {
+    case 'draft':
+      return '📝 下一步：请完成目标设定，然后点击"提交"按钮提交审批'
+    case 'self_evaluated':
+      return '⌛ 自评已完成，等待经理进行上级评估。您可以查看自评详情'
+    case 'manager_evaluated':
+      return '📊 系统正在计算最终分数...'
+    case 'finalized':
+      return '🎉 绩效评估已完成！您可以查看最终评分和等级'
+    default:
+      return ''
+  }
+})
+
 // 事件处理方法
 const showCreateGoalDialog = () => {
   goalForm.period = undefined
@@ -649,7 +761,10 @@ const submitSelfEvaluation = async () => {
     
     ElMessage.success('自评提交成功')
     selfEvaluationVisible.value = false
-    loadEvaluations()
+    
+    // 使用 await 确保数据加载完成后再结束 loading 状态
+    await loadEvaluations()
+    await loadStatistics()
   } catch (error: any) {
     console.error('提交自评失败:', error)
     ElMessage.error('提交自评失败')
@@ -826,6 +941,14 @@ onMounted(() => {
   nextTick(() => {
     window.addEventListener('resize', handleResize)
   })
+})
+
+// 当组件被 keep-alive 缓存后重新激活时，重新加载数据
+onActivated(() => {
+  console.log('[PerformanceView] 页面激活，重新加载数据')
+  loadEvaluations()
+  loadGoals()
+  loadStatistics()
 })
 </script>
 

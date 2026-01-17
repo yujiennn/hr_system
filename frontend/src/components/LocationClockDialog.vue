@@ -219,6 +219,7 @@ const resetState = () => {
 const getCurrentLocation = async () => {
   try {
     locationLoading.value = true
+    console.log('[LocationClockDialog] 🔵 开始获取位置...')
     
     // 获取当前位置
     const location = await locationService.getCurrentPosition({
@@ -227,13 +228,16 @@ const getCurrentLocation = async () => {
       maximumAge: 30000
     })
     
+    console.log('[LocationClockDialog] ✅ 位置获取成功:', location)
     currentLocation.value = location
     
     // 获取最近的公司位置
     await getNearestLocation()
     
   } catch (error: any) {
-    console.error('获取位置失败:', error)
+    console.error('[LocationClockDialog] ❌ 获取位置失败:', error)
+    console.error('[LocationClockDialog] 错误代码:', error.code)
+    console.error('[LocationClockDialog] 错误消息:', error.message)
     ElMessage.error(error.message || '获取位置失败，请检查位置权限')
   } finally {
     locationLoading.value = false
@@ -245,18 +249,27 @@ const getNearestLocation = async () => {
   if (!currentLocation.value) return
   
   try {
+    console.log('[LocationClockDialog] 📍 正在获取最近的公司位置...', {
+      latitude: currentLocation.value.latitude,
+      longitude: currentLocation.value.longitude
+    })
+    
     const response = await locationService.getNearestLocation(
       currentLocation.value.latitude,
       currentLocation.value.longitude
     )
     
+    console.log('[LocationClockDialog] ✅ 位置验证成功:', response)
+    
     if (response.success) {
       nearestLocation.value = response.data
     } else {
+      console.warn('[LocationClockDialog] ⚠️ 未找到可用的打卡位置')
       ElMessage.warning('未找到可用的打卡位置')
     }
   } catch (error: any) {
-    console.error('获取最近位置失败:', error)
+    console.error('[LocationClockDialog] ❌ 获取最近位置失败:', error)
+    console.error('[LocationClockDialog] 错误详情:', error.response?.data || error.message)
     ElMessage.error('获取打卡位置失败')
   }
 }
@@ -269,6 +282,7 @@ const refreshLocation = async () => {
 // 提交打卡
 const submitClock = async () => {
   if (!currentLocation.value || !nearestLocation.value) {
+    console.error('[LocationClockDialog] ❌ 位置信息不完整')
     ElMessage.error('位置信息不完整')
     return
   }
@@ -285,19 +299,29 @@ const submitClock = async () => {
       force_clock: false
     }
 
+    console.log('[LocationClockDialog] 📤 准备提交打卡数据:', clockData)
+
     let response
     if (props.clockType === 'in') {
+      console.log('[LocationClockDialog] 📤 调用 locationClockIn API...')
       response = await attendanceService.locationClockIn(clockData)
     } else {
+      console.log('[LocationClockDialog] 📤 调用 locationClockOut API...')
       response = await attendanceService.locationClockOut(clockData)
     }
 
+    console.log('[LocationClockDialog] ✅ 打卡API响应:', response)
     ElMessage.success(response.message || `${clockTypeText.value}成功`)
     emit('success', response)
     visible.value = false
     
   } catch (error: any) {
-    console.error('打卡失败:', error)
+    console.error('[LocationClockDialog] ❌ 打卡失败:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    })
     ElMessage.error(error.response?.data?.error || '打卡失败')
   } finally {
     submitting.value = false

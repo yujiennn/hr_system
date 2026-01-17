@@ -15,13 +15,20 @@ const api: AxiosInstance = axios.create({
 // 请求拦截器
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('access_token')
+    // 使用 sessionStorage 实现多标签页独立登录
+    const token = sessionStorage.getItem('access_token')
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    console.log('[API] 📤 请求:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      hasToken: !!token
+    })
     return config
   },
   (error) => {
+    console.error('[API] ❌ 请求配置错误:', error)
     return Promise.reject(error)
   }
 )
@@ -29,24 +36,30 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('API响应成功:', response.config.url, response.status)
+    console.log('[API] ✅ 响应成功:', {
+      url: response.config.url,
+      status: response.status,
+      statusText: response.statusText
+    })
     return response
   },
   (error) => {
-  console.error('API请求错误详情:')
-  console.error('- URL:', error.config?.url)
-  console.error('- 方法:', error.config?.method)
-  console.error('- 状态码:', error.response?.status)
-  console.error('- 状态文本:', error.response?.statusText)
-  console.error('- 响应数据:', error.response?.data)
-  console.error('- 错误消息:', error.message)
+    console.error('[API] ❌ 请求错误详情:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      errorCode: error.code,
+      message: error.message,
+      responseData: error.response?.data
+    })
     
     if (error.response?.status === 401) {
       // Token 过期或无效，清除本地存储
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      sessionStorage.removeItem('access_token')
+      sessionStorage.removeItem('refresh_token')
       // 暂时注释掉自动跳转，用于调试
-      console.warn('401 Unauthorized - 可能需要登录')
+      console.warn('[API] ⚠️ 401 Unauthorized - 可能需要登录')
       // window.location.href = '/login'
     }
     return Promise.reject(error)

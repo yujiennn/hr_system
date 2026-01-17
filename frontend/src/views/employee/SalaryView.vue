@@ -166,7 +166,8 @@
     <!-- 薪资详情对话框 -->
     <el-dialog v-model="detailVisible" title="薪资详情" width="70%">
       <div v-if="selectedSalary" class="salary-detail">
-        <el-descriptions border :column="2">
+        <!-- 基本信息 -->
+        <el-descriptions title="基本信息" border :column="2">
           <el-descriptions-item label="年月">
             {{ selectedSalary.year }}年{{ selectedSalary.month }}月
           </el-descriptions-item>
@@ -174,10 +175,68 @@
             <el-tag :type="getSalaryStatusType(selectedSalary.status)">
               {{ getSalaryStatusLabel(selectedSalary.status) }}
             </el-tag>
-          </el-descriptions-item>          <el-descriptions-item label="基本工资">
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 绩效信息 -->
+        <el-descriptions title="绩效信息" border :column="3" style="margin-top: 20px;">
+          <el-descriptions-item label="绩效得分">
+            {{ selectedSalary.performance_score ? selectedSalary.performance_score.toFixed(1) : '未评定' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="绩效等级">
+            <el-tag v-if="selectedSalary.performance_level" 
+                   :type="getPerformanceLevelType(selectedSalary.performance_level)">
+              {{ selectedSalary.performance_level_display || selectedSalary.performance_level }}
+            </el-tag>
+            <span v-else>未评定</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="绩效系数">
+            {{ selectedSalary.performance_coefficient || 1.0 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="绩效奖金">
+            ¥{{ formatAmount(selectedSalary.performance_bonus) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="考核周期">
+            {{ selectedSalary.performance_period_name || '-' }}
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 考勤信息 -->
+        <el-descriptions title="考勤信息" border :column="4" style="margin-top: 20px;">
+          <el-descriptions-item label="全勤状态">
+            <el-tag :type="selectedSalary.is_full_attendance ? 'success' : 'info'">
+              {{ selectedSalary.is_full_attendance ? '全勤' : '非全勤' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="全勤奖">
+            ¥{{ formatAmount(selectedSalary.full_attendance_bonus) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="迟到次数">
+            {{ selectedSalary.late_count || 0 }} 次
+          </el-descriptions-item>
+          <el-descriptions-item label="早退次数">
+            {{ selectedSalary.early_leave_count || 0 }} 次
+          </el-descriptions-item>
+          <el-descriptions-item label="缺勤次数">
+            {{ selectedSalary.absence_count || 0 }} 次
+          </el-descriptions-item>
+          <el-descriptions-item label="请假天数">
+            {{ selectedSalary.leave_days || 0 }} 天
+          </el-descriptions-item>
+          <el-descriptions-item label="病假天数">
+            {{ selectedSalary.sick_leave_days || 0 }} 天
+          </el-descriptions-item>
+          <el-descriptions-item label="事假天数">
+            {{ selectedSalary.personal_leave_days || 0 }} 天
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 薪资明细 -->
+        <el-descriptions title="薪资明细" border :column="2" style="margin-top: 20px;">
+          <el-descriptions-item label="基本工资">
             ¥{{ formatAmount(selectedSalary.basic_salary) }}
           </el-descriptions-item>
-          <el-descriptions-item label="绩效工资">
+          <el-descriptions-item label="绩效奖金">
             ¥{{ formatAmount(selectedSalary.performance_bonus) }}
           </el-descriptions-item>
           <el-descriptions-item label="加班费">
@@ -186,9 +245,18 @@
           <el-descriptions-item label="津贴补助">
             ¥{{ formatAmount(selectedSalary.allowances) }}
           </el-descriptions-item>
-          <el-descriptions-item label="应发工资">
-            ¥{{ formatAmount(selectedSalary.gross_salary) }}
+          <el-descriptions-item label="全勤奖">
+            ¥{{ formatAmount(selectedSalary.full_attendance_bonus) }}
           </el-descriptions-item>
+          <el-descriptions-item label="应发工资">
+            <span style="color: #67C23A; font-weight: bold;">
+              ¥{{ formatAmount(selectedSalary.gross_salary) }}
+            </span>
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 扣款明细 -->
+        <el-descriptions title="扣款明细" border :column="2" style="margin-top: 20px;">
           <el-descriptions-item label="社保个人">
             ¥{{ formatAmount(selectedSalary.social_security) }}
           </el-descriptions-item>
@@ -201,11 +269,32 @@
           <el-descriptions-item label="其他扣除">
             ¥{{ formatAmount(selectedSalary.other_deductions) }}
           </el-descriptions-item>
-          <el-descriptions-item label="扣除合计">
-            ¥{{ formatAmount((selectedSalary.social_security || 0) + (selectedSalary.housing_fund || 0) + (selectedSalary.income_tax || 0) + (selectedSalary.other_deductions || 0)) }}
+          <el-descriptions-item label="请假扣款">
+            <span style="color: #F56C6C;">
+              ¥{{ formatAmount(selectedSalary.leave_deduction) }}
+            </span>
           </el-descriptions-item>
+          <el-descriptions-item label="迟到扣款">
+            <span style="color: #F56C6C;">
+              ¥{{ formatAmount(selectedSalary.late_deduction) }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="缺勤扣款">
+            <span style="color: #F56C6C;">
+              ¥{{ formatAmount(selectedSalary.absence_deduction) }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="扣除合计">
+            <span style="color: #F56C6C; font-weight: bold;">
+              ¥{{ formatAmount(getTotalDeductions(selectedSalary)) }}
+            </span>
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 最终结算 -->
+        <el-descriptions title="最终结算" border :column="2" style="margin-top: 20px;">
           <el-descriptions-item label="实发工资">
-            <span style="color: #409EFF; font-weight: bold; font-size: 16px;">
+            <span style="color: #409EFF; font-weight: bold; font-size: 18px;">
               ¥{{ formatAmount(selectedSalary.net_salary) }}
             </span>
           </el-descriptions-item>
@@ -271,9 +360,10 @@ const incomeItems = computed(() => {
   if (!currentSalary.value) return []
   return [
     { name: '基本工资', amount: currentSalary.value.basic_salary },
-    { name: '绩效工资', amount: currentSalary.value.performance_bonus },
+    { name: '绩效奖金', amount: currentSalary.value.performance_bonus },
     { name: '加班费', amount: currentSalary.value.overtime_pay },
-    { name: '津贴补助', amount: currentSalary.value.allowances }
+    { name: '津贴补助', amount: currentSalary.value.allowances },
+    { name: '全勤奖', amount: currentSalary.value.full_attendance_bonus || 0 }
   ].filter(item => item.amount > 0)
 })
 
@@ -284,7 +374,10 @@ const deductionItems = computed(() => {
     { name: '社保个人', amount: currentSalary.value.social_security },
     { name: '公积金个人', amount: currentSalary.value.housing_fund },
     { name: '个人所得税', amount: currentSalary.value.income_tax },
-    { name: '其他扣除', amount: currentSalary.value.other_deductions }
+    { name: '其他扣除', amount: currentSalary.value.other_deductions },
+    { name: '请假扣款', amount: currentSalary.value.leave_deduction || 0 },
+    { name: '迟到扣款', amount: currentSalary.value.late_deduction || 0 },
+    { name: '缺勤扣款', amount: currentSalary.value.absence_deduction || 0 }
   ].filter(item => item.amount > 0)
 })
 
@@ -301,6 +394,24 @@ const getSalaryStatusType = (status: string) => {
 // 获取薪资状态标签
 const getSalaryStatusLabel = (status: string) => {
   return salaryService.getSalaryStatusLabel(status)
+}
+
+// 获取绩效等级类型
+const getPerformanceLevelType = (level: string | null | undefined) => {
+  return salaryService.getPerformanceLevelType(level)
+}
+
+// 计算扣除合计
+const getTotalDeductions = (salary: SalaryRecord) => {
+  return (
+    (salary.social_security || 0) +
+    (salary.housing_fund || 0) +
+    (salary.income_tax || 0) +
+    (salary.other_deductions || 0) +
+    (salary.leave_deduction || 0) +
+    (salary.late_deduction || 0) +
+    (salary.absence_deduction || 0)
+  )
 }
 
 // 筛选变化处理

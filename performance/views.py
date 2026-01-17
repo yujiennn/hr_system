@@ -227,10 +227,21 @@ class PerformanceGoalViewSet(viewsets.ModelViewSet):
         """审批绩效目标"""
         goal = self.get_object()
         
-        # 检查权限 - 只有管理员和经理可以审批
+        # 检查权限
         user = request.user
-        if user.user_type not in ['manager', 'admin']:
-            return Response({'error': '无权限审批'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # 权限检查：
+        # 1. 管理员可以审批任何人的目标
+        # 2. 经理可以审批同部门员工的目标
+        # 3. 财务部员工可以审批任何人的目标（财务职能）
+        can_approve = (
+            user.is_admin or 
+            (user.is_manager and user.department == goal.user.department) or
+            user.is_finance_department
+        )
+        
+        if not can_approve:
+            return Response({'error': '无权限审批此目标'}, status=status.HTTP_403_FORBIDDEN)
         
         if goal.status != 'submitted':
             return Response({'error': '只有已提交的目标可以审批'}, status=status.HTTP_400_BAD_REQUEST)
@@ -306,8 +317,14 @@ class PerformanceEvaluationViewSet(viewsets.ModelViewSet):
             # 管理员可以查看所有
             pass
         elif user.user_type == 'manager':
-            # 经理只能查看本部门
-            queryset = queryset.filter(goal__user__department=user.department)
+            # 经理可以查看本部门员工的评估，以及自己作为评估人的评估
+            if user.department:
+                queryset = queryset.filter(
+                    Q(goal__user__department=user.department) | Q(evaluator=user)
+                )
+            else:
+                # 如果经理没有部门，只能查看自己作为评估人的评估或自己的评估
+                queryset = queryset.filter(Q(evaluator=user) | Q(goal__user=user))
         else:
             # 普通员工只能查看自己的
             queryset = queryset.filter(goal__user=user)
@@ -333,6 +350,9 @@ class PerformanceEvaluationViewSet(viewsets.ModelViewSet):
         if period_id:
             evaluations = evaluations.filter(goal__period_id=period_id)
         
+        # 按更新时间降序排列，确保最新的在前面
+        evaluations = evaluations.order_by('-updated_at')
+        
         serializer = self.get_serializer(evaluations, many=True)
         return Response(serializer.data)
     
@@ -341,12 +361,15 @@ class PerformanceEvaluationViewSet(viewsets.ModelViewSet):
         """自评"""
         evaluation = self.get_object()
         
-        # 检查权限
+        # 检查权限 - 只有评估所属的员工本人才能自评
         if evaluation.goal.user != request.user:
-            return Response({'error': '无权操作此评估'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({
+                'error': '无权操作此评估',
+                'detail': f'此评估属于用户 {evaluation.goal.user.username}，当前登录用户为 {request.user.username}'
+            }, status=status.HTTP_403_FORBIDDEN)
         
         if evaluation.status not in ['draft', 'self_evaluated']:
-            return Response({'error': '当前状态不允许自评'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': f'当前状态({evaluation.status})不允许自评，只有草稿或自评完成状态可以修改'}, status=status.HTTP_400_BAD_REQUEST)
         
         serializer = SelfEvaluationSerializer(evaluation, data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -361,8 +384,22 @@ class PerformanceEvaluationViewSet(viewsets.ModelViewSet):
         
         # 检查权限 - 只有管理员和经理可以评估
         user = request.user
-        if user.user_type not in ['manager', 'admin']:
-            return Response({'error': '无权限评估'}, status=status.HTTP_403_FORBIDDEN)
+        evaluated_user = evaluation.goal.user
+        
+        # 调试日志
+        print(f"[DEBUG] manager_evaluate: user={user.username}, user_type={user.user_type}, evaluated_user={evaluated_user.username}")
+        
+        # 权限检查：管理员或该部门的经理
+        if user.user_type == 'admin':
+            # 管理员可以评估任何人
+            pass
+        elif user.user_type == 'manager':
+            # 经理只能评估自己部门的员工
+            if evaluated_user.department != user.department:
+                return Response({'error': '无权限评估其他部门员工'}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            print(f"[DEBUG] 权限拒绝: user_type={user.user_type} 不是 admin 或 manager")
+            return Response({'error': f'无权限评估 (user_type={user.user_type})'}, status=status.HTTP_403_FORBIDDEN)
         
         if evaluation.status not in ['self_evaluated', 'manager_evaluated']:
             return Response({'error': '当前状态不允许上级评估'}, status=status.HTTP_400_BAD_REQUEST)

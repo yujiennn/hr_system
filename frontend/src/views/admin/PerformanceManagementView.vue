@@ -7,6 +7,39 @@
       </div>
     </el-card>
 
+    <!-- 管理员流程指引 -->
+    <el-card class="process-guide">
+      <template #header>
+        <span>📊 绩效管理流程</span>
+      </template>
+      <el-alert
+        :title="'全年绩效管理流程：① 创建绩效周期和模板 ② 员工创建并提交目标 ③ 经理批准员工目标 ④ 员工进行自评 ⑤ 经理进行上级评估 ⑥ 系统生成最终报告'"
+        type="info"
+        :closable="false"
+      />
+      <el-divider style="margin: 12px 0"></el-divider>
+      <el-row :gutter="20" style="margin-top: 12px">
+        <el-col :span="8">
+          <div class="process-step">
+            <el-statistic title="活跃周期" :value="stats.totalPeriods" />
+            <el-button type="text" style="margin-top: 8px">去管理周期</el-button>
+          </div>
+        </el-col>
+        <el-col :span="8">
+          <div class="process-step">
+            <el-statistic title="待审批目标" :value="pendingGoals" />
+            <el-button type="text" style="margin-top: 8px">查看待审批</el-button>
+          </div>
+        </el-col>
+        <el-col :span="8">
+          <div class="process-step">
+            <el-statistic title="待评估" :value="pendingEvaluations" />
+            <el-button type="text" style="margin-top: 8px">查看待评估</el-button>
+          </div>
+        </el-col>
+      </el-row>
+    </el-card>
+
     <!-- 统计概览 -->
     <el-row :gutter="20" class="stats-row">
       <el-col :span="6">
@@ -392,6 +425,109 @@
             </el-row>
           </div>
         </el-tab-pane>
+
+        <!-- 流程概览 -->
+        <el-tab-pane label="流程概览" name="workflow">
+          <div class="tab-content">
+            <div class="tab-header">
+              <h3>当前周期绩效流程概览</h3>
+              <el-button @click="loadWorkflowStatus" :loading="evaluationsLoading">刷新</el-button>
+            </div>
+
+            <el-alert
+              type="info"
+              :closable="false"
+              show-icon
+              style="margin-bottom: 20px"
+            >
+              <template #default>
+                此概览展示<strong>活跃周期</strong>的所有员工的绩效流程进度。包括 4 个关键阶段：
+                <strong>① 目标设定 → ② 目标审批 → ③ 自评与上级评估 → ④ 流程完成</strong>
+              </template>
+            </el-alert>
+
+            <!-- 流程阶段统计 -->
+            <el-row :gutter="20" style="margin-bottom: 20px">
+              <el-col :span="6">
+                <el-card class="stage-card">
+                  <div class="stage-item">
+                    <div class="stage-number">①</div>
+                    <div class="stage-name">目标设定中</div>
+                    <div class="stage-count">{{ workflowStats.draft_count }}</div>
+                    <el-progress :percentage="calculateStagePercentage(workflowStats.draft_count)" :color="'#E6A23C'" />
+                  </div>
+                </el-card>
+              </el-col>
+              <el-col :span="6">
+                <el-card class="stage-card">
+                  <div class="stage-item">
+                    <div class="stage-number">②</div>
+                    <div class="stage-name">待目标审批</div>
+                    <div class="stage-count">{{ workflowStats.submitted_count }}</div>
+                    <el-progress :percentage="calculateStagePercentage(workflowStats.submitted_count)" :color="'#F56C6C'" />
+                  </div>
+                </el-card>
+              </el-col>
+              <el-col :span="6">
+                <el-card class="stage-card">
+                  <div class="stage-item">
+                    <div class="stage-number">③</div>
+                    <div class="stage-name">评估中</div>
+                    <div class="stage-count">{{ workflowStats.evaluation_count }}</div>
+                    <el-progress :percentage="calculateStagePercentage(workflowStats.evaluation_count)" :color="'#409EFF'" />
+                  </div>
+                </el-card>
+              </el-col>
+              <el-col :span="6">
+                <el-card class="stage-card">
+                  <div class="stage-item">
+                    <div class="stage-number">④</div>
+                    <div class="stage-name">已完成</div>
+                    <div class="stage-count">{{ workflowStats.completed_count }}</div>
+                    <el-progress :percentage="calculateStagePercentage(workflowStats.completed_count)" :color="'#67C23A'" />
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+
+            <!-- 部门流程进度 -->
+            <el-card>
+              <template #header>
+                <span>📊 各部门流程进度</span>
+              </template>
+              <el-table :data="workflowDepartmentStats" stripe>
+                <el-table-column prop="department" label="部门" width="150" />
+                <el-table-column label="目标设定中" width="100" align="center">
+                  <template #default="{ row }">
+                    <el-tag type="warning">{{ row.draft_count }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="待目标审批" width="120" align="center">
+                  <template #default="{ row }">
+                    <el-tag type="danger">{{ row.submitted_count }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="评估中" width="100" align="center">
+                  <template #default="{ row }">
+                    <el-tag type="info">{{ row.evaluation_count }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="已完成" width="100" align="center">
+                  <template #default="{ row }">
+                    <el-tag type="success">{{ row.completed_count }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="整体进度" width="180">
+                  <template #default="{ row }">
+                    <el-progress 
+                      :percentage="Math.round((row.completed_count / (row.draft_count + row.submitted_count + row.evaluation_count + row.completed_count || 1)) * 100)" 
+                    />
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-card>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-card>    <!-- 新建/编辑周期对话框 -->
     <el-dialog 
@@ -711,7 +847,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Calendar,
@@ -891,6 +1027,26 @@ const approvalRules = {
   status: [{ required: true, message: '请选择审批状态', trigger: 'change' }]
 }
 
+// 计算属性：待审批目标数
+const pendingGoals = computed(() => {
+  return goals.value.filter(goal => goal.status === 'submitted').length
+})
+
+// 计算属性：待评估数
+const pendingEvaluations = computed(() => {
+  return evaluations.value.filter(evaluation => evaluation.status === 'self_evaluated').length
+})
+
+// 流程状态统计
+const workflowStats = reactive({
+  draft_count: 0,
+  submitted_count: 0,
+  evaluation_count: 0,
+  completed_count: 0
+})
+
+const workflowDepartmentStats = ref<any[]>([])
+
 // 生命周期
 onMounted(async () => {
   console.log('绩效管理页面mounted')
@@ -1003,7 +1159,7 @@ const loadAllUsers = async () => {
     
     console.log('认证token存在，token前缀:', token.substring(0, 20) + '...')
     
-    const response = await api.get('/auth/users/')
+    const response = await api.get('/users/users/')
     console.log('用户列表API响应:', response.status, response.data)
     
     allUsers.value = response.data.results || response.data || []
@@ -1056,10 +1212,103 @@ const calculateRatingPercentage = (count: number) => {
   return Math.round((count / total) * 100)
 }
 
+// 加载流程状态
+const loadWorkflowStatus = async () => {
+  evaluationsLoading.value = true
+  try {
+    // 首先获取所有目标
+    const goalsResponse = await api.get('/performance/goals/')
+    const allGoals = goalsResponse.data.results || goalsResponse.data || []
+    
+    // 获取所有评估
+    const evaluationsResponse = await api.get('/performance/evaluations/')
+    const allEvaluations = evaluationsResponse.data.results || evaluationsResponse.data || []
+    
+    // 统计各阶段
+    let draftCount = 0
+    let submittedCount = 0
+    let evaluationCount = 0
+    let completedCount = 0
+    
+    // 按目标状态统计
+    allGoals.forEach((goal: any) => {
+      if (goal.status === 'draft') draftCount++
+      else if (goal.status === 'submitted') submittedCount++
+    })
+    
+    // 按评估状态统计
+    allEvaluations.forEach((evaluation: any) => {
+      if (['self_evaluated', 'manager_evaluated'].includes(evaluation.status)) {
+        evaluationCount++
+      } else if (evaluation.status === 'finalized') {
+        completedCount++
+      }
+    })
+    
+    workflowStats.draft_count = draftCount
+    workflowStats.submitted_count = submittedCount
+    workflowStats.evaluation_count = evaluationCount
+    workflowStats.completed_count = completedCount
+    
+    // 按部门统计
+    const deptMap = new Map<string, any>()
+    allGoals.forEach((goal: any) => {
+      const dept = goal.user_department || '未分配'
+      if (!deptMap.has(dept)) {
+        deptMap.set(dept, {
+          department: dept,
+          draft_count: 0,
+          submitted_count: 0,
+          evaluation_count: 0,
+          completed_count: 0
+        })
+      }
+      const stats = deptMap.get(dept)!
+      if (goal.status === 'draft') stats.draft_count++
+      else if (goal.status === 'submitted') stats.submitted_count++
+    })
+    
+    allEvaluations.forEach((evaluation: any) => {
+      const dept = evaluation.user_department || '未分配'
+      if (!deptMap.has(dept)) {
+        deptMap.set(dept, {
+          department: dept,
+          draft_count: 0,
+          submitted_count: 0,
+          evaluation_count: 0,
+          completed_count: 0
+        })
+      }
+      const stats = deptMap.get(dept)!
+      if (['self_evaluated', 'manager_evaluated'].includes(evaluation.status)) {
+        stats.evaluation_count++
+      } else if (evaluation.status === 'finalized') {
+        stats.completed_count++
+      }
+    })
+    
+    workflowDepartmentStats.value = Array.from(deptMap.values())
+  } catch (error) {
+    console.error('加载流程状态失败:', error)
+    ElMessage.error('加载流程状态失败')
+  } finally {
+    evaluationsLoading.value = false
+  }
+}
+
+// 计算阶段百分比
+const calculateStagePercentage = (count: number) => {
+  const total = Object.values(workflowStats).reduce((sum, val) => sum + val, 0)
+  if (total === 0) return 0
+  return Math.round((count / total) * 100)
+}
+
 const handleTabClick = (tab: any) => {
   console.log('切换到标签页:', tab.name)
   if (tab.name === 'statistics') {
     loadStatistics()
+  } else if (tab.name === 'workflow') {
+    loadWorkflowStatus()
   }
 }
 
@@ -1979,6 +2228,53 @@ const handleManagerEvaluationClose = () => {
 
 .dept-progress {
   margin-top: 10px;
+}
+
+.process-guide {
+  margin-bottom: 20px;
+}
+
+.process-step {
+  text-align: center;
+}
+
+.process-step :deep(.el-statistic__content) {
+  font-size: 28px;
+  font-weight: 600;
+  color: #409EFF;
+}
+
+.process-step :deep(.el-statistic__title) {
+  font-size: 14px;
+  color: #666;
+}
+
+.stage-card {
+  text-align: center;
+}
+
+.stage-item {
+  padding: 10px 0;
+}
+
+.stage-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #409EFF;
+  margin-bottom: 8px;
+}
+
+.stage-name {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stage-count {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
 }
 
 .dialog-footer {

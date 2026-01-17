@@ -109,12 +109,17 @@ const handleLogin = async () => {
       ElMessage.success('登录成功')
       
       // 根据用户类型跳转到不同页面
-      const userType = userStore.userType
-      console.log('用户类型:', userType)
+      const userType = result.user?.user_type
+      const isFinanceDept = result.user?.is_finance_department
+      console.log('用户类型:', userType, '是财务部:', isFinanceDept)
+      
       if (userType === 'admin') {
         router.push('/admin')
       } else if (userType === 'manager') {
         router.push('/manager')
+      } else if (isFinanceDept) {
+        // 财务部员工进入财务布局
+        router.push('/finance')
       } else {
         router.push('/employee')
       }

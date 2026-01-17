@@ -38,7 +38,7 @@ class User(AbstractUser):
     ]
 
     employee_id = models.CharField(max_length=20, unique=True, verbose_name='员工编号')
-    phone = models.CharField(max_length=11, unique=True, verbose_name='手机号码')
+    phone = models.CharField(max_length=11, blank=True, verbose_name='手机号码')
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='employee', verbose_name='用户类型')
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='所属部门')
       # 个人信息
@@ -55,7 +55,6 @@ class User(AbstractUser):
     face_image = models.ImageField(upload_to='face_images/', null=True, blank=True, verbose_name='人脸图片')
     face_registered = models.BooleanField(default=False, verbose_name='是否已录入人脸')
     face_registered_at = models.DateTimeField(null=True, blank=True, verbose_name='人脸录入时间')
-    emergency_phone = models.CharField(max_length=11, blank=True, verbose_name='紧急联系人电话')
     
     # 教育背景和技能
     education = models.CharField(max_length=50, blank=True, verbose_name='教育程度')
@@ -92,3 +91,10 @@ class User(AbstractUser):
     @property
     def is_employee(self):
         return self.user_type == 'employee'
+    
+    @property
+    def is_finance_department(self):
+        """检查用户是否属于财务部"""
+        if self.department is None:
+            return False
+        return self.department.name in ['财务部', '财务', 'Finance', 'FINANCE']

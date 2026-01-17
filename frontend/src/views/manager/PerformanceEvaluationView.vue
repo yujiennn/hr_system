@@ -41,9 +41,10 @@
               </el-form-item>
               <el-form-item label="评估状态">
                 <el-select v-model="filterForm.status" placeholder="全部状态" clearable>
-            <el-option label="待评估" value="pending" />
-            <el-option label="已完成" value="completed" />
-            <el-option label="已确认" value="confirmed" />
+            <el-option label="草稿" value="draft" />
+            <el-option label="待评估" value="self_evaluated" />
+            <el-option label="已评估" value="manager_evaluated" />
+            <el-option label="已确认" value="finalized" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -52,6 +53,44 @@
           <el-button type="success" @click="showAddDialog = true">新建评估</el-button>
         </el-form-item>
       </el-form>
+    </el-card>
+
+    <!-- 经理流程指引 -->
+    <el-card class="process-guide">
+      <template #header>
+        <div class="process-header">
+          <span>📋 经理评估指南</span>
+        </div>
+      </template>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <div class="process-step">
+            <div class="step-num">1️⃣</div>
+            <div class="step-content">
+              <div class="step-title">审批员工目标</div>
+              <div class="step-desc">员工提交的绩效目标需要您批准。点击"目标审批"标签页查看待审批的目标</div>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="8">
+          <div class="process-step">
+            <div class="step-num">2️⃣</div>
+            <div class="step-content">
+              <div class="step-title">员工自评完成</div>
+              <div class="step-desc">员工完成自评后，系统会显示在"待评估"中。查看员工的自评意见和分数</div>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="8">
+          <div class="process-step">
+            <div class="step-num">3️⃣</div>
+            <div class="step-content">
+              <div class="step-title">填写上级评估</div>
+              <div class="step-desc">根据员工的自评、目标达成情况和工作表现，填写您的上级评估意见和评分</div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
     </el-card>
 
     <!-- 统计概览 -->
@@ -162,9 +201,17 @@
         <el-table-column prop="workEfficiency" label="工作效率" width="100" align="center" />
         <el-table-column prop="teamwork" label="团队协作" width="100" align="center" />
         <el-table-column prop="innovation" label="创新能力" width="100" align="center" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="140">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">{{ getStatusText(row.status) }}</el-tag>
+            <div class="status-cell">
+              <el-tag :type="getStatusType(row.status)">{{ getStatusText(row.status) }}</el-tag>
+              <el-tooltip v-if="row.status === 'self_evaluated'" :content="'⏳ 员工已完成自评，等待您评估'" placement="top">
+                <el-icon class="info-icon"><Warning /></el-icon>
+              </el-tooltip>
+              <el-tooltip v-if="row.status === 'manager_evaluated'" :content="'✅ 评估完成，可以确认'" placement="top">
+                <el-icon class="info-icon"><SuccessFilled /></el-icon>
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="evaluateDate" label="评估日期" width="120" />
@@ -172,7 +219,7 @@
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="viewDetail(row)">查看</el-button>
             <el-button
-              v-if="row.status === 'pending'"
+              v-if="row.status === 'self_evaluated'"
               type="warning"
               size="small"
               @click="editEvaluation(row)"
@@ -180,7 +227,7 @@
               评估
             </el-button>
             <el-button
-              v-if="row.status === 'completed'"
+              v-if="row.status === 'manager_evaluated'"
               type="success"
               size="small"
               @click="confirmEvaluation(row)"
@@ -659,9 +706,15 @@ const getLevelType = (level: string) => {
 // 获取状态类型
 const getStatusType = (status: string) => {
   const typeMap: Record<string, string> = {
+    // 旧的状态名（兼容）
     pending: 'warning',
     completed: 'success',
-    confirmed: 'info'
+    confirmed: 'info',
+    // 后端实际返回的状态名
+    draft: 'info',
+    self_evaluated: 'warning',      // 自评完成，待经理评估
+    manager_evaluated: 'success',   // 经理评估完成
+    finalized: 'success'            // 已确认完成
   }
   return typeMap[status] || 'default'
 }
@@ -669,9 +722,15 @@ const getStatusType = (status: string) => {
 // 获取状态文本
 const getStatusText = (status: string) => {
   const textMap: Record<string, string> = {
+    // 旧的状态名（兼容）
     pending: '待评估',
     completed: '已完成',
-    confirmed: '已确认'
+    confirmed: '已确认',
+    // 后端实际返回的状态名
+    draft: '草稿',
+    self_evaluated: '待评估',       // 员工自评完成，等待经理评估
+    manager_evaluated: '已评估',    // 经理评估完成
+    finalized: '已确认'             // 最终确认
   }
   return textMap[status] || status
 }

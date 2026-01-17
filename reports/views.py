@@ -359,11 +359,12 @@ class DataStatisticsView(APIView):
             count=Count('id')
         )
         
+        # 将 Decimal 转换为 float，确保可以被 JSON 序列化
         return {
-            'total_gross_salary': stats['total_gross'] or 0,
-            'total_net_salary': stats['total_net'] or 0,
-            'average_gross_salary': stats['avg_gross'] or 0,
-            'average_net_salary': stats['avg_net'] or 0,
+            'total_gross_salary': float(stats['total_gross']) if stats['total_gross'] else 0,
+            'total_net_salary': float(stats['total_net']) if stats['total_net'] else 0,
+            'average_gross_salary': float(stats['avg_gross']) if stats['avg_gross'] else 0,
+            'average_net_salary': float(stats['avg_net']) if stats['avg_net'] else 0,
             'total_records': stats['count'] or 0
         }
     
@@ -372,9 +373,9 @@ class DataStatisticsView(APIView):
         if user.is_admin:
             queryset = PerformanceEvaluation.objects.all()
         elif user.is_manager:
-            queryset = PerformanceEvaluation.objects.filter(user__department=user.department)
+            queryset = PerformanceEvaluation.objects.filter(goal__user__department=user.department)
         else:
-            queryset = PerformanceEvaluation.objects.filter(user=user)
+            queryset = PerformanceEvaluation.objects.filter(goal__user=user)
         
         # 本年度数据
         current_year = timezone.now().year
@@ -386,9 +387,10 @@ class DataStatisticsView(APIView):
             avg=Avg('final_score')
         )['avg'] or 0
         
+        # 将 Decimal 转换为 float，确保可以被 JSON 序列化
         return {
             'total_evaluations': total_evaluations,
             'completed_evaluations': completed_evaluations,
             'completion_rate': round(completed_evaluations / max(total_evaluations, 1) * 100, 1),
-            'average_score': round(avg_score, 1)
+            'average_score': round(float(avg_score) if avg_score else 0, 1)
         }

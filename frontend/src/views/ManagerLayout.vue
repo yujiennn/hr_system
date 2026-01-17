@@ -58,7 +58,9 @@
                 <span>请假管理</span>
               </template>
               <el-menu-item index="/manager/leave">请假审批</el-menu-item>
-            </el-sub-menu>            <el-sub-menu index="performance-management">
+            </el-sub-menu>
+
+            <el-sub-menu index="performance-management">
               <template #title>
                 <el-icon><TrendCharts /></el-icon>
                 <span>绩效管理</span>
@@ -66,12 +68,12 @@
               <el-menu-item index="/manager/performance">绩效评估</el-menu-item>
             </el-sub-menu>
 
-            <el-sub-menu index="salary-management">
+            <el-sub-menu index="salary-approval">
               <template #title>
                 <el-icon><Money /></el-icon>
-                <span>薪资管理</span>
+                <span>薪资审批</span>
               </template>
-              <el-menu-item index="/manager/salary">薪资管理</el-menu-item>
+              <el-menu-item index="/manager/salary">薪资审批</el-menu-item>
             </el-sub-menu>
           </el-menu>
         </el-aside>
@@ -137,7 +139,7 @@ const getBreadcrumbTitle = () => {
     '/manager/attendance': '考勤管理',
     '/manager/leave': '请假管理',
     '/manager/performance': '绩效管理',
-    '/manager/salary': '薪资管理',
+    '/manager/salary': '薪资审批',
     '/manager/profile': '个人资料'
   }
   return routeMap[router.currentRoute.value.path] || '未知页面'

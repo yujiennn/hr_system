@@ -13,6 +13,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
     avatar = serializers.ImageField(required=False, allow_null=True)
+    is_finance_department = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -21,9 +22,13 @@ class UserSerializer(serializers.ModelSerializer):
             'phone', 'user_type', 'department', 'department_name', 'avatar',
             'gender', 'birth_date', 'id_card', 'address', 'emergency_contact',
             'emergency_phone', 'hire_date', 'position', 'job_level', 'base_salary',
-            'is_active_employee', 'created_at', 'updated_at'
+            'is_active_employee', 'created_at', 'updated_at', 'is_finance_department'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'is_finance_department']
+    
+    def get_is_finance_department(self, obj):
+        """返回用户是否是财务部员工"""
+        return obj.is_finance_department
     
     def to_representation(self, instance):
         """序列化时返回完整的avatar URL"""
@@ -106,6 +111,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
     avatar = serializers.ImageField(required=False, allow_null=True)
+    is_finance_department = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -114,9 +120,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             'phone', 'user_type', 'department', 'department_name', 'avatar',
             'gender', 'birth_date', 'id_card', 'address', 'emergency_contact',
             'emergency_phone', 'position', 'job_level', 'hire_date',
-            'education', 'major', 'university', 'work_experience', 'skills', 'bio'
+            'education', 'major', 'university', 'work_experience', 'skills', 'bio',
+            'is_finance_department'
         ]
-        read_only_fields = ['id', 'username', 'employee_id', 'user_type', 'department']
+        read_only_fields = ['id', 'username', 'employee_id', 'user_type', 'department', 'is_finance_department']
+    
+    def get_is_finance_department(self, obj):
+        """返回用户是否是财务部员工"""
+        return obj.is_finance_department
     
     def to_representation(self, instance):
         """序列化时返回完整的avatar URL"""

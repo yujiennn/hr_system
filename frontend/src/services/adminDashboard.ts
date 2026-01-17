@@ -21,7 +21,7 @@ class AdminDashboardService {
       console.log('🔥 统计API响应:', data)
       
       // 同时查询部门数据
-      const deptResponse = await api.get('/auth/departments/')
+      const deptResponse = await api.get('/users/departments/')
       const departmentsCount = deptResponse.data.length || 0
       console.log('🔥 部门数据:', deptResponse.data)
       
@@ -70,7 +70,7 @@ class AdminDashboardService {
   // 辅助方法：获取用户统计
   async fetchUserStats() {
     try {
-      const response = await api.get('/auth/users/', { params: { page_size: 1 } })
+      const response = await api.get('/users/users/', { params: { page_size: 1 } })
       return { total: response.data.count || 0 }
     } catch (e) {
       return { total: 0 }
@@ -80,7 +80,7 @@ class AdminDashboardService {
   // 辅助方法：获取部门统计
   async fetchDepartmentStats() {
     try {
-      const response = await api.get('/auth/departments/')
+      const response = await api.get('/users/departments/')
       return { count: response.data.length || 0 }
     } catch (e) {
       return { count: 0 }

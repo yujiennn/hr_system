@@ -35,7 +35,7 @@ class DepartmentService {  // 获取所有部门
   async getDepartments(): Promise<Department[]> {
     try {
       console.log('发送部门API请求...')
-      const response = await request.get('/auth/departments/')
+      const response = await request.get('/users/departments/')
       console.log('部门API响应:', response)
       console.log('响应状态:', response.status)
       console.log('响应数据:', response.data)
@@ -67,7 +67,7 @@ class DepartmentService {  // 获取所有部门
   // 获取单个部门详情
   async getDepartment(id: number): Promise<Department> {
     try {
-      const response = await request.get(`/auth/departments/${id}/`)
+      const response = await request.get(`/users/departments/${id}/`)
       return response.data
     } catch (error: any) {
       console.error('获取部门详情失败:', error)
@@ -77,7 +77,7 @@ class DepartmentService {  // 获取所有部门
   // 创建部门
   async createDepartment(data: DepartmentCreateRequest): Promise<Department> {
     try {
-      const response = await request.post('/auth/departments/', data)
+      const response = await request.post('/users/departments/', data)
       return response.data
     } catch (error: any) {
       console.error('创建部门失败:', error)
@@ -87,7 +87,7 @@ class DepartmentService {  // 获取所有部门
   // 更新部门
   async updateDepartment(id: number, data: Partial<DepartmentCreateRequest>): Promise<Department> {
     try {
-      const response = await request.patch(`/auth/departments/${id}/`, data)
+      const response = await request.patch(`/users/departments/${id}/`, data)
       return response.data
     } catch (error: any) {
       console.error('更新部门失败:', error)
@@ -97,7 +97,7 @@ class DepartmentService {  // 获取所有部门
   // 删除部门
   async deleteDepartment(id: number): Promise<void> {
     try {
-      await request.delete(`/auth/departments/${id}/`)
+      await request.delete(`/users/departments/${id}/`)
     } catch (error: any) {
       console.error('删除部门失败:', error)
       throw error

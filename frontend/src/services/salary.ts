@@ -1,5 +1,31 @@
 import api from '../utils/api'
 
+// 薪资配置接口
+export interface SalaryConfig {
+  id: number
+  name: string
+  is_active: boolean
+  full_attendance_bonus: number
+  performance_level_a_min: number
+  performance_level_b_min: number
+  performance_level_c_min: number
+  performance_level_a_coefficient: number
+  performance_level_b_coefficient: number
+  performance_level_c_coefficient: number
+  performance_level_d_coefficient: number
+  performance_bonus_base_rate: number
+  sick_leave_free_days: number
+  sick_leave_deduction_rate: number
+  personal_leave_deduction_rate: number
+  late_deduction_minor: number
+  late_deduction_major: number
+  late_threshold_minutes: number
+  absence_deduction_rate: number
+  work_days_per_month: number
+  created_at: string
+  updated_at: string
+}
+
 // 薪资记录接口
 export interface SalaryRecord {
   id: number
@@ -15,10 +41,67 @@ export interface SalaryRecord {
   income_tax: number
   other_deductions: number
   net_salary: number
-  status: string
+  status: 'draft' | 'manager_reviewed' | 'finance_approved' | 'paid' | 'rejected'
+  status_display?: string
   pay_date: string | null
   created_at: string
   updated_at: string
+  
+  // === 绩效关联字段 ===
+  performance_evaluation?: number | null
+  performance_score?: number | null
+  performance_level?: 'A' | 'B' | 'C' | 'D' | null
+  performance_level_display?: string | null
+  performance_coefficient?: number
+  performance_period_name?: string | null
+  
+  // === 全勤奖字段 ===
+  full_attendance_bonus?: number
+  is_full_attendance?: boolean
+  
+  // === 考勤扣款字段 ===
+  leave_deduction?: number
+  late_deduction?: number
+  absence_deduction?: number
+  
+  // === 考勤统计字段 ===
+  leave_days?: number
+  sick_leave_days?: number
+  personal_leave_days?: number
+  other_leave_days?: number
+  late_count?: number
+  early_leave_count?: number
+  absence_count?: number
+  actual_work_days?: number
+  
+  // 审批信息
+  manager?: {
+    id: number
+    username: string
+    get_full_name: string
+  }
+  manager_reviewed_at?: string
+  manager_note?: string
+  finance_approver?: {
+    id: number
+    username: string
+    get_full_name: string
+  }
+  finance_approved_at?: string
+  finance_note?: string
+  paid_by?: {
+    id: number
+    username: string
+    get_full_name: string
+  }
+  rejected_by?: {
+    id: number
+    username: string
+    get_full_name: string
+  }
+  rejection_reason?: string
+  rejected_at?: string
+  // 用户信息
   user_name?: string
   employee_id?: string
   department_name?: string
@@ -33,6 +116,27 @@ export interface SalaryRecord {
       }
     }
   }
+}
+
+// 计算工资请求参数
+export interface CalculateSalaryParams {
+  user_id: number
+  year: number
+  month: number
+  basic_salary?: number
+  allowances?: number
+  overtime_pay?: number
+  social_security?: number
+  housing_fund?: number
+  income_tax?: number
+  other_deductions?: number
+}
+
+// 批量计算请求参数
+export interface BatchCalculateParams {
+  year: number
+  month: number
+  department_id?: number
 }
 
 // 薪资查询参数
@@ -64,15 +168,141 @@ export interface SalaryStatistics {
 }
 
 // 薪资服务类
-class SalaryService {  // 获取薪资记录列表
-  async getSalaryRecords(params: SalaryQueryParams = {}) {
-    const response = await api.get('/salary/records/', { params })
-    // 处理分页格式的响应
+class SalaryService {  // 获取部门薪资记录（经理专用）
+  async getDepartmentRecords(params: SalaryQueryParams = {}) {
+    const response = await api.get('/salary/records/department-records/', { params })
     if (response.data && response.data.results) {
-      return response.data.results
+      return response.data
     }
     return response.data || []
   }
+
+  // 获取待经理审核的薪资
+  async getPendingReview(params: SalaryQueryParams = {}) {
+    const response = await api.get('/salary/records/pending-review/', { params })
+    if (response.data && response.data.results) {
+      return response.data
+    }
+    return response.data || []
+  }
+
+  // 获取待财务部批准的薪资（财务部专用）
+  async getPendingApproval(params: SalaryQueryParams = {}) {
+    const response = await api.get('/salary/records/pending-approval/', { params })
+    if (response.data && response.data.results) {
+      return response.data
+    }
+    return response.data || []
+  }
+
+  // 创建薪资记录（财务部员工专用）
+  async createSalary(data: Partial<SalaryRecord>) {
+    const response = await api.post('/salary/records/', data)
+    return response.data
+  }
+
+  // 更新薪资记录（财务部员工专用）
+  async updateSalary(id: number, data: Partial<SalaryRecord>) {
+    const response = await api.patch(`/salary/records/${id}/`, data)
+    return response.data
+  }
+
+  // 经理审核薪资
+  async reviewSalary(id: number, action: 'approve' | 'reject', managerNote: string = '') {
+    const response = await api.post(`/salary/records/${id}/manager-review/`, {
+      action,
+      manager_note: managerNote
+    })
+    return response.data
+  }
+
+  // 财务部门批准薪资
+  async approveSalary(id: number, action: 'approve' | 'reject', financeNote: string = '') {
+    const response = await api.post(`/salary/records/${id}/finance-approve/`, {
+      action,
+      finance_note: financeNote
+    })
+    return response.data
+  }
+
+  // 财务部门发放薪资
+  async paySalary(id: number, payDate: string) {
+    const response = await api.post(`/salary/records/${id}/pay/`, {
+      pay_date: payDate
+    })
+    return response.data
+  }
+
+  // 获取部门员工列表（用于创建薪资）
+  async getDepartmentEmployees() {
+    const response = await api.get('/salary/records/department-employees/')
+    return response.data.employees || []
+  }
+
+  // === 新增：薪资计算相关方法 ===
+  
+  // 计算单个员工工资
+  async calculateSalary(params: CalculateSalaryParams) {
+    const response = await api.post('/salary/records/calculate/', params)
+    return response.data
+  }
+
+  // 批量计算员工工资
+  async batchCalculateSalary(params: BatchCalculateParams) {
+    const response = await api.post('/salary/records/batch-calculate/', params)
+    return response.data
+  }
+
+  // 重新计算工资
+  async recalculateSalary(id: number) {
+    const response = await api.post(`/salary/records/${id}/recalculate/`)
+    return response.data
+  }
+
+  // 获取考勤汇总
+  async getAttendanceSummary(id: number) {
+    const response = await api.get(`/salary/records/${id}/attendance-summary/`)
+    return response.data
+  }
+
+  // 获取绩效汇总
+  async getPerformanceSummary(id: number) {
+    const response = await api.get(`/salary/records/${id}/performance-summary/`)
+    return response.data
+  }
+
+  // === 薪资配置相关方法 ===
+  
+  // 获取当前启用的配置
+  async getActiveConfig(): Promise<SalaryConfig> {
+    const response = await api.get('/salary/config/active/')
+    return response.data
+  }
+
+  // 获取所有配置
+  async getAllConfigs(): Promise<SalaryConfig[]> {
+    const response = await api.get('/salary/config/')
+    return response.data.results || response.data
+  }
+
+  // 创建配置
+  async createConfig(data: Partial<SalaryConfig>): Promise<SalaryConfig> {
+    const response = await api.post('/salary/config/', data)
+    return response.data
+  }
+
+  // 更新配置
+  async updateConfig(id: number, data: Partial<SalaryConfig>): Promise<SalaryConfig> {
+    const response = await api.patch(`/salary/config/${id}/`, data)
+    return response.data
+  }
+
+  // 激活配置
+  async activateConfig(id: number) {
+    const response = await api.post(`/salary/config/${id}/activate/`)
+    return response.data
+  }
+
   // 获取当前用户的薪资记录
   async getMySalaryRecords(params: SalaryQueryParams = {}) {
     const response = await api.get('/salary/records/my-records/', { params })
@@ -204,14 +434,18 @@ class SalaryService {  // 获取薪资记录列表
   }
 
   // 获取薪资状态类型（用于Element Plus标签样式）
-  getSalaryStatusType(status: string): string {
+  getSalaryStatusType(status: string): 'success' | 'warning' | 'info' | 'danger' {
     switch (status) {
+      case 'draft':
+        return 'info'
+      case 'manager_reviewed':
+        return 'warning'
+      case 'finance_approved':
+        return 'success'
       case 'paid':
         return 'success'
-      case 'pending':
-        return 'warning'
-      case 'processing':
-        return 'info'
+      case 'rejected':
+        return 'danger'
       default:
         return 'info'
     }
@@ -220,14 +454,50 @@ class SalaryService {  // 获取薪资记录列表
   // 获取薪资状态标签文字
   getSalaryStatusLabel(status: string): string {
     switch (status) {
+      case 'draft':
+        return '草稿'
+      case 'manager_reviewed':
+        return '经理已审核'
+      case 'finance_approved':
+        return '财务已批准'
       case 'paid':
         return '已发放'
-      case 'pending':
-        return '待发放'
-      case 'processing':
-        return '处理中'
+      case 'rejected':
+        return '已拒绝'
       default:
         return '未知'
+    }
+  }
+
+  // 获取绩效等级类型（用于Element Plus标签样式）
+  getPerformanceLevelType(level: string | null | undefined): 'success' | 'warning' | 'info' | 'danger' {
+    switch (level) {
+      case 'A':
+        return 'success'
+      case 'B':
+        return 'success'
+      case 'C':
+        return 'warning'
+      case 'D':
+        return 'danger'
+      default:
+        return 'info'
+    }
+  }
+
+  // 获取绩效等级标签文字
+  getPerformanceLevelLabel(level: string | null | undefined): string {
+    switch (level) {
+      case 'A':
+        return '优秀'
+      case 'B':
+        return '良好'
+      case 'C':
+        return '合格'
+      case 'D':
+        return '待改进'
+      default:
+        return '未评定'
     }
   }
 }

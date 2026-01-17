@@ -190,7 +190,10 @@ class PerformanceService {
 
   // 获取我的绩效评估
   async getMyEvaluations(params: PerformanceQueryParams = {}): Promise<PerformanceEvaluation[]> {
-    const response = await api.get('/performance/evaluations/my_evaluations/', { params })
+    // 添加时间戳防止浏览器缓存
+    const response = await api.get('/performance/evaluations/my_evaluations/', { 
+      params: { ...params, _t: Date.now() }
+    })
     // 处理分页格式的响应
     if (response.data && response.data.results) {
       return response.data.results
@@ -309,9 +312,18 @@ class PerformanceService {
     return totalWeight > 0 ? (totalScore / totalWeight * 100) : 0
   }
 
-  // 检查是否可以自评
-  canSelfEvaluate(evaluation: PerformanceEvaluation): boolean {
-    return ['draft', 'self_evaluated'].includes(evaluation.status)
+  // 检查是否可以自评（需要传入当前用户ID来验证）
+  canSelfEvaluate(evaluation: PerformanceEvaluation, currentUserId?: number): boolean {
+    // 状态必须是 draft 或 self_evaluated
+    const statusOk = ['draft', 'self_evaluated'].includes(evaluation.status)
+    
+    // 如果传入了用户ID，还需要检查是否是评估所属的用户
+    if (currentUserId !== undefined && evaluation.goal_info?.user !== undefined) {
+      return statusOk && evaluation.goal_info.user === currentUserId
+    }
+    
+    // 如果没有传入用户ID，只检查状态（向后兼容）
+    return statusOk
   }
 
   // 检查是否可以上级评估

@@ -215,7 +215,7 @@ class ManagerEvaluationDetailSerializer(serializers.ModelSerializer):
 
 class ManagerEvaluationSerializer(serializers.ModelSerializer):
     """上级评估序列化器"""
-    details = ManagerEvaluationDetailSerializer(many=True)
+    details = ManagerEvaluationDetailSerializer(many=True, required=False)
     
     class Meta:
         model = PerformanceEvaluation

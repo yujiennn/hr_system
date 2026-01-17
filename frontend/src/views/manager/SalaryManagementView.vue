@@ -4,9 +4,32 @@
     <div class="page-header">
       <div class="header-content">
         <h2>薪资管理</h2>
-        <el-button type="primary" :icon="Plus" @click="showCreateDialog = true">
-          创建薪资记录
-        </el-button>
+        <div class="header-actions">
+          <el-button 
+            type="success" 
+            @click="showBatchCalculateDialog = true"
+            v-if="canCreate"
+          >
+            <el-icon><DataAnalysis /></el-icon>
+            批量计算工资
+          </el-button>
+          <el-button 
+            type="primary" 
+            :icon="Plus" 
+            @click="showCreateDialog = true"
+            v-if="canCreate"
+          >
+            创建薪资记录
+          </el-button>
+          <el-button 
+            v-else 
+            disabled 
+            type="info" 
+            :icon="Plus"
+          >
+            创建薪资记录（权限不足）
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -148,33 +171,68 @@
             {{ row.pay_date || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="320" fixed="right">
           <template #default="{ row }">
+            <!-- 查看详情（所有人可见）-->
             <el-button type="primary" size="small" @click="viewSalaryDetail(row)">
               详情
             </el-button>
+
+            <!-- 编辑（仅财务部、管理员、状态为draft）-->
             <el-button 
               type="warning" 
               size="small" 
               @click="editSalary(row)"
-              v-if="row.status === 'draft'"
+              v-if="canEdit(row)"
             >
               编辑
             </el-button>
+
+            <!-- 审核（仅部门经理、本部门）-->
+            <el-button 
+              type="success" 
+              size="small" 
+              @click="reviewSalary(row)"
+              v-if="canReview(row) && row.status === 'draft'"
+            >
+              审核
+            </el-button>
+
+            <!-- 批准（仅财务部、管理员、状态为manager_reviewed）-->
+            <el-button 
+              type="danger" 
+              size="small" 
+              @click="approveSalary(row)"
+              v-if="canApprove(row)"
+            >
+              批准
+            </el-button>
+
+            <!-- 发放（仅财务部、管理员、状态为finance_approved）-->
+            <el-button 
+              type="info" 
+              size="small" 
+              @click="paySalary(row)"
+              v-if="canPay(row)"
+            >
+              发放
+            </el-button>
+
+            <!-- 导出 -->
             <el-dropdown @command="handleCommand" trigger="click">
               <el-button type="info" size="small">
                 更多<el-icon class="el-icon--right"><arrow-down /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item :command="`approve-${row.id}`" v-if="row.status === 'draft'">
-                    审批通过
-                  </el-dropdown-item>
-                  <el-dropdown-item :command="`pay-${row.id}`" v-if="row.status === 'approved'">
-                    标记发放
-                  </el-dropdown-item>
                   <el-dropdown-item :command="`export-${row.id}`">
                     导出工资单
+                  </el-dropdown-item>
+                  <el-dropdown-item 
+                    :command="`delete-${row.id}`"
+                    v-if="canEdit(row)"
+                  >
+                    删除
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -197,14 +255,24 @@
       </div>
     </el-card>
 
-    <!-- 创建薪资记录对话框 -->
+    <!-- 创建/编辑薪资记录对话框 -->
     <el-dialog
       v-model="showCreateDialog"
-      title="创建薪资记录"
+      :title="editingId ? '编辑薪资记录' : '创建薪资记录'"
       width="800px"
       @close="resetCreateForm"
     >
       <el-form :model="createForm" :rules="createRules" ref="createFormRef" label-width="120px">
+        <!-- 提示信息 -->
+        <el-alert 
+          title="财务设置说明" 
+          type="info" 
+          :closable="false"
+          style="margin-bottom: 20px"
+        >
+          请填写以下基本项目，绩效奖金、加班费、全勤奖将由系统根据员工绩效评估和考勤记录自动计算。
+        </el-alert>
+        
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="员工" prop="userId">
@@ -213,6 +281,7 @@
                 filterable
                 placeholder="选择员工"
                 style="width: 100%"
+                :disabled="!!editingId"
                 @change="onEmployeeChange"
               >
                 <el-option 
@@ -250,6 +319,9 @@
           </el-col>
         </el-row>
         
+        <!-- 财务设置项：基本工资和津贴 -->
+        <el-divider content-position="left">财务设置项目</el-divider>
+        
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="基本工资" prop="basicSalary">
@@ -262,19 +334,6 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="绩效奖金" prop="performanceBonus">
-              <el-input-number 
-                v-model="createForm.performanceBonus" 
-                :min="0" 
-                :precision="2"
-                style="width: 100%" 
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        
-        <el-row :gutter="20">
-          <el-col :span="12">
             <el-form-item label="津贴补助" prop="allowances">
               <el-input-number 
                 v-model="createForm.allowances" 
@@ -284,17 +343,10 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="加班费" prop="overtimePay">
-              <el-input-number 
-                v-model="createForm.overtimePay" 
-                :min="0" 
-                :precision="2"
-                style="width: 100%" 
-              />
-            </el-form-item>
-          </el-col>
         </el-row>
+        
+        <!-- 扣除项 -->
+        <el-divider content-position="left">扣除项目</el-divider>
         
         <el-row :gutter="20">
           <el-col :span="12">
@@ -342,15 +394,34 @@
           </el-col>
         </el-row>
 
-        <!-- 计算预览 -->
+        <!-- 系统自动计算说明 -->
+        <el-divider content-position="left">系统自动计算项目</el-divider>
+        
+        <el-alert 
+          type="warning" 
+          :closable="false"
+          style="margin-bottom: 15px"
+        >
+          <template #title>
+            以下项目将在保存后由系统根据员工数据自动计算：
+          </template>
+          <ul style="margin: 5px 0 0 20px; padding: 0;">
+            <li><strong>绩效奖金</strong>：根据绩效评估得分和系数自动计算（基本工资 × 奖金基数比例 × 绩效系数）</li>
+            <li><strong>加班费</strong>：根据已批准的加班申请记录自动计算（加班小时数 × 时薪）</li>
+            <li><strong>全勤奖</strong>：根据考勤记录判断是否符合全勤条件</li>
+            <li><strong>考勤扣款</strong>：根据迟到、缺勤、请假记录自动计算扣款</li>
+          </ul>
+        </el-alert>
+
+        <!-- 计算预览（仅显示财务设置的部分） -->
         <el-card class="calculation-preview">
           <template #header>
-            <span>薪资计算预览</span>
+            <span>薪资预览（基于财务设置项）</span>
           </template>
           <el-row :gutter="20">
             <el-col :span="8">
               <div class="calc-item">
-                <span class="calc-label">应发工资：</span>
+                <span class="calc-label">基本收入：</span>
                 <span class="calc-value gross">¥{{ formatAmount(calculatedGrossSalary) }}</span>
               </div>
             </el-col>
@@ -362,32 +433,101 @@
             </el-col>
             <el-col :span="8">
               <div class="calc-item">
-                <span class="calc-label">实发工资：</span>
+                <span class="calc-label">预计实发：</span>
                 <span class="calc-value net">¥{{ formatAmount(calculatedNetSalary) }}</span>
               </div>
             </el-col>
           </el-row>
+          <div style="font-size: 12px; color: #909399; margin-top: 10px;">
+            * 最终金额将在保存后加入绩效奖金、加班费、全勤奖等系统自动计算项目
+          </div>
         </el-card>
       </el-form>
       
       <template #footer>
         <el-button @click="showCreateDialog = false">取消</el-button>
         <el-button type="primary" @click="createSalaryRecord" :loading="saving">
-          创建
+          {{ editingId ? '保存并计算' : '创建并计算' }}
         </el-button>
       </template>
     </el-dialog>
 
     <!-- 薪资详情对话框 -->
-    <el-dialog v-model="showDetailDialog" title="薪资详情" width="70%">
+    <el-dialog v-model="showDetailDialog" title="薪资详情" width="80%">
       <div v-if="selectedSalary" class="salary-detail">
-        <el-descriptions border :column="2">
+        <!-- 基本信息 -->
+        <el-descriptions title="基本信息" border :column="2">
           <el-descriptions-item label="员工信息">
             {{ selectedSalary.user_name }} ({{ selectedSalary.employee_id }})
+          </el-descriptions-item>
+          <el-descriptions-item label="所属部门">
+            {{ selectedSalary.department_name || '-' }}
           </el-descriptions-item>
           <el-descriptions-item label="年月">
             {{ selectedSalary.year }}年{{ selectedSalary.month }}月
           </el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="getSalaryStatusType(selectedSalary.status)">
+              {{ getSalaryStatusLabel(selectedSalary.status) }}
+            </el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 绩效信息 -->
+        <el-descriptions title="绩效信息" border :column="3" style="margin-top: 20px;">
+          <el-descriptions-item label="绩效得分">
+            {{ selectedSalary.performance_score ? selectedSalary.performance_score.toFixed(1) : '未评定' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="绩效等级">
+            <el-tag v-if="selectedSalary.performance_level" 
+                   :type="getPerformanceLevelType(selectedSalary.performance_level)">
+              {{ getPerformanceLevelLabel(selectedSalary.performance_level) }}
+            </el-tag>
+            <span v-else>未评定</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="绩效系数">
+            {{ selectedSalary.performance_coefficient || 1.0 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="绩效奖金">
+            ¥{{ formatAmount(selectedSalary.performance_bonus) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="考核周期">
+            {{ selectedSalary.performance_period_name || '-' }}
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 考勤信息 -->
+        <el-descriptions title="考勤信息" border :column="4" style="margin-top: 20px;">
+          <el-descriptions-item label="全勤状态">
+            <el-tag :type="selectedSalary.is_full_attendance ? 'success' : 'info'">
+              {{ selectedSalary.is_full_attendance ? '全勤' : '非全勤' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="全勤奖">
+            ¥{{ formatAmount(selectedSalary.full_attendance_bonus) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="迟到次数">
+            {{ selectedSalary.late_count || 0 }} 次
+          </el-descriptions-item>
+          <el-descriptions-item label="早退次数">
+            {{ selectedSalary.early_leave_count || 0 }} 次
+          </el-descriptions-item>
+          <el-descriptions-item label="缺勤次数">
+            {{ selectedSalary.absence_count || 0 }} 次
+          </el-descriptions-item>
+          <el-descriptions-item label="请假天数">
+            {{ selectedSalary.leave_days || 0 }} 天
+          </el-descriptions-item>
+          <el-descriptions-item label="病假天数">
+            {{ selectedSalary.sick_leave_days || 0 }} 天
+          </el-descriptions-item>
+          <el-descriptions-item label="事假天数">
+            {{ selectedSalary.personal_leave_days || 0 }} 天
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 薪资明细 -->
+        <el-descriptions title="薪资明细" border :column="2" style="margin-top: 20px;">
           <el-descriptions-item label="基本工资">
             ¥{{ formatAmount(selectedSalary.basic_salary) }}
           </el-descriptions-item>
@@ -400,11 +540,18 @@
           <el-descriptions-item label="加班费">
             ¥{{ formatAmount(selectedSalary.overtime_pay) }}
           </el-descriptions-item>
+          <el-descriptions-item label="全勤奖">
+            ¥{{ formatAmount(selectedSalary.full_attendance_bonus) }}
+          </el-descriptions-item>
           <el-descriptions-item label="应发工资">
-            <span style="color: #409EFF; font-weight: bold;">
+            <span style="color: #67C23A; font-weight: bold;">
               ¥{{ formatAmount(selectedSalary.gross_salary) }}
             </span>
           </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 扣款明细 -->
+        <el-descriptions title="扣款明细" border :column="2" style="margin-top: 20px;">
           <el-descriptions-item label="社保扣除">
             ¥{{ formatAmount(selectedSalary.social_security) }}
           </el-descriptions-item>
@@ -417,15 +564,29 @@
           <el-descriptions-item label="其他扣除">
             ¥{{ formatAmount(selectedSalary.other_deductions) }}
           </el-descriptions-item>
-          <el-descriptions-item label="实发工资">
-            <span style="color: #67C23A; font-weight: bold; font-size: 16px;">
-              ¥{{ formatAmount(selectedSalary.net_salary) }}
+          <el-descriptions-item label="请假扣款">
+            <span style="color: #F56C6C;">
+              ¥{{ formatAmount(selectedSalary.leave_deduction) }}
             </span>
           </el-descriptions-item>
-          <el-descriptions-item label="状态">
-            <el-tag :type="getSalaryStatusType(selectedSalary.status)">
-              {{ getSalaryStatusLabel(selectedSalary.status) }}
-            </el-tag>
+          <el-descriptions-item label="迟到扣款">
+            <span style="color: #F56C6C;">
+              ¥{{ formatAmount(selectedSalary.late_deduction) }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="缺勤扣款">
+            <span style="color: #F56C6C;">
+              ¥{{ formatAmount(selectedSalary.absence_deduction) }}
+            </span>
+          </el-descriptions-item>
+        </el-descriptions>
+        
+        <!-- 最终结算 -->
+        <el-descriptions title="最终结算" border :column="2" style="margin-top: 20px;">
+          <el-descriptions-item label="实发工资">
+            <span style="color: #409EFF; font-weight: bold; font-size: 18px;">
+              ¥{{ formatAmount(selectedSalary.net_salary) }}
+            </span>
           </el-descriptions-item>
           <el-descriptions-item label="发放日期">
             {{ selectedSalary.pay_date || '未发放' }}
@@ -433,7 +594,54 @@
         </el-descriptions>
       </div>
       <template #footer>
+        <el-button 
+          v-if="selectedSalary && canEdit(selectedSalary)" 
+          type="warning" 
+          @click="recalculateSalary(selectedSalary)"
+        >
+          重新计算
+        </el-button>
         <el-button @click="showDetailDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 批量计算对话框 -->
+    <el-dialog v-model="showBatchCalculateDialog" title="批量计算工资" width="500px">
+      <el-form :model="batchCalculateForm" label-width="100px">
+        <el-form-item label="年份" required>
+          <el-select v-model="batchCalculateForm.year" style="width: 100%">
+            <el-option 
+              v-for="year in yearOptions" 
+              :key="year" 
+              :label="year" 
+              :value="year" 
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="月份" required>
+          <el-select v-model="batchCalculateForm.month" style="width: 100%">
+            <el-option 
+              v-for="month in monthOptions" 
+              :key="month" 
+              :label="`${month}月`" 
+              :value="month" 
+            />
+          </el-select>
+        </el-form-item>
+        <el-alert 
+          type="info" 
+          :closable="false"
+          style="margin-top: 10px;"
+        >
+          <p>批量计算将根据员工的绩效评估和考勤数据自动生成工资记录。</p>
+          <p>已在审批流程中的工资记录将被跳过。</p>
+        </el-alert>
+      </el-form>
+      <template #footer>
+        <el-button @click="showBatchCalculateDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleBatchCalculate" :loading="calculating">
+          开始计算
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -448,10 +656,13 @@ import {
   Download,
   Plus,
   Refresh,
-  ArrowDown
+  ArrowDown,
+  DataAnalysis
 } from '@element-plus/icons-vue'
 import api from '@/utils/api'
 import { salaryService } from '@/services/salary'
+import { useAuthStore } from '@/stores/counter'
+import * as permissions from '@/utils/permissions'
 
 // 类型定义
 interface DepartmentEmployee {
@@ -466,6 +677,7 @@ interface SalaryRecord {
   user_id: number
   user_name: string
   employee_id: string
+  department_name?: string
   year: number
   month: number
   basic_salary: number
@@ -480,6 +692,42 @@ interface SalaryRecord {
   net_salary: number
   status: string
   pay_date?: string
+  
+  // 绩效关联字段
+  performance_evaluation?: number | null
+  performance_score?: number | null
+  performance_level?: string | null
+  performance_level_display?: string | null
+  performance_coefficient?: number
+  performance_period_name?: string | null
+  
+  // 全勤奖字段
+  full_attendance_bonus?: number
+  is_full_attendance?: boolean
+  
+  // 考勤扣款字段
+  leave_deduction?: number
+  late_deduction?: number
+  absence_deduction?: number
+  
+  // 考勤统计字段
+  leave_days?: number
+  sick_leave_days?: number
+  personal_leave_days?: number
+  other_leave_days?: number
+  late_count?: number
+  early_leave_count?: number
+  absence_count?: number
+  actual_work_days?: number
+  
+  // 用户信息
+  user?: {
+    id: number
+    department?: {
+      id: number
+      name: string
+    }
+  }
 }
 
 interface SalaryStatistics {
@@ -492,9 +740,12 @@ interface SalaryStatistics {
 // 响应式数据
 const loading = ref(false)
 const saving = ref(false)
+const calculating = ref(false)
 const showCreateDialog = ref(false)
 const showDetailDialog = ref(false)
+const showBatchCalculateDialog = ref(false)
 const createFormRef = ref()
+const editingId = ref<number | null>(null)  // 编辑模式记录ID
 
 const currentPage = ref(1)
 const pageSize = ref(20)
@@ -506,6 +757,16 @@ const statistics = ref<SalaryStatistics | null>(null)
 const selectedSalary = ref<SalaryRecord | null>(null)
 const route = useRoute()
 
+// 权限检查（NEW）
+const authStore = useAuthStore()
+const user = computed(() => authStore.user)
+const canCreate = computed(() => permissions.canCreateSalary(user.value as any))
+const canEdit = (salary: SalaryRecord) => permissions.canEditSalary(user.value as any, salary.status)
+const canReview = (salary: SalaryRecord) => 
+  permissions.canReviewSalary(user.value as any, salary.user?.id, salary.user?.department?.id)
+const canApprove = (salary: SalaryRecord) => permissions.canApproveSalary(user.value as any, salary.status)
+const canPay = (salary: SalaryRecord) => permissions.canPaySalary(user.value as any, salary.status)
+
 // 搜索表单
 const searchForm = reactive({
   year: new Date().getFullYear(),
@@ -513,15 +774,15 @@ const searchForm = reactive({
   employeeId: null as string | null
 })
 
-// 创建表单
+// 创建表单 - 仅包含财务设置的字段
 const createForm = reactive({
   userId: null,
   year: new Date().getFullYear(),
   month: new Date().getMonth() + 1,
+  // 财务设置项
   basicSalary: 0,
-  performanceBonus: 0,
   allowances: 0,
-  overtimePay: 0,
+  // 扣除项
   socialSecurity: 0,
   housingFund: 0,
   incomeTax: 0,
@@ -547,12 +808,16 @@ const monthOptions = computed(() => {
   return Array.from({ length: 12 }, (_, i) => i + 1)
 })
 
-// 计算预览
+// 批量计算表单
+const batchCalculateForm = reactive({
+  year: new Date().getFullYear(),
+  month: new Date().getMonth() + 1
+})
+
+// 计算预览 - 仅显示财务设置的部分
 const calculatedGrossSalary = computed(() => {
   return (createForm.basicSalary || 0) + 
-         (createForm.performanceBonus || 0) + 
-         (createForm.allowances || 0) + 
-         (createForm.overtimePay || 0)
+         (createForm.allowances || 0)
 })
 
 const calculatedDeductions = computed(() => {
@@ -577,6 +842,16 @@ const getSalaryStatusType = (status: string) => {
 
 const getSalaryStatusLabel = (status: string) => {
   return salaryService.getSalaryStatusLabel(status)
+}
+
+// 获取绩效等级类型
+const getPerformanceLevelType = (level: string | null | undefined) => {
+  return salaryService.getPerformanceLevelType(level)
+}
+
+// 获取绩效等级标签
+const getPerformanceLevelLabel = (level: string | null | undefined) => {
+  return salaryService.getPerformanceLevelLabel(level)
 }
 
 // 加载部门员工
@@ -640,7 +915,7 @@ const resetSearch = () => {
   loadSalaryRecords()
 }
 
-// 创建薪资记录
+// 创建或更新薪资记录
 const createSalaryRecord = async () => {
   if (!createFormRef.value) return
   
@@ -649,28 +924,38 @@ const createSalaryRecord = async () => {
     
     saving.value = true
     try {
+      // 只发送财务设置的字段，系统自动计算字段由后端处理
       const data = {
         user: createForm.userId,
         year: createForm.year,
         month: createForm.month,
+        // 财务设置项
         basic_salary: createForm.basicSalary,
-        performance_bonus: createForm.performanceBonus,
         allowances: createForm.allowances,
-        overtime_pay: createForm.overtimePay,
+        // 扣除项
         social_security: createForm.socialSecurity,
         housing_fund: createForm.housingFund,
         income_tax: createForm.incomeTax,
-        other_deductions: createForm.otherDeductions
+        other_deductions: createForm.otherDeductions,
+        // 启用自动计算
+        auto_calculate: true
       }
       
-      await api.post('/salary/records/', data)
-      ElMessage.success('创建成功')
+      if (editingId.value) {
+        // 更新模式
+        await api.patch(`/salary/records/${editingId.value}/`, data)
+        ElMessage.success('更新成功，绩效奖金、加班费已自动计算')
+      } else {
+        // 创建模式
+        await api.post('/salary/records/', data)
+        ElMessage.success('创建成功，绩效奖金、加班费已自动计算')
+      }
       showCreateDialog.value = false
       resetCreateForm()
       await loadSalaryRecords()
     } catch (error: any) {
-      console.error('创建薪资记录失败:', error)
-      ElMessage.error(error.response?.data?.detail || '创建失败')
+      console.error('保存薪资记录失败:', error)
+      ElMessage.error(error.response?.data?.detail || '保存失败')
     } finally {
       saving.value = false
     }
@@ -679,14 +964,15 @@ const createSalaryRecord = async () => {
 
 // 重置创建表单
 const resetCreateForm = () => {
+  editingId.value = null  // 重置编辑模式
   Object.assign(createForm, {
     userId: null,
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
+    // 财务设置项
     basicSalary: 0,
-    performanceBonus: 0,
     allowances: 0,
-    overtimePay: 0,
+    // 扣除项
     socialSecurity: 0,
     housingFund: 0,
     incomeTax: 0,
@@ -711,21 +997,23 @@ const viewSalaryDetail = (salary: any) => {
   showDetailDialog.value = true
 }
 
-// 编辑薪资
+// 编辑薪资 - 只填充财务设置的字段
 const editSalary = (salary: any) => {
-  // 填充编辑表单
+  // 记录编辑模式和ID
+  editingId.value = salary.id
+  // 填充编辑表单 - 只填充财务可设置的字段
   Object.assign(createForm, {
-    userId: salary.user_id,
+    userId: salary.user,  // API 返回的是 user (用户ID)
     year: salary.year,
     month: salary.month,
-    basicSalary: salary.basic_salary,
-    performanceBonus: salary.performance_bonus,
-    allowances: salary.allowances,
-    overtimePay: salary.overtime_pay,
-    socialSecurity: salary.social_security,
-    housingFund: salary.housing_fund,
-    incomeTax: salary.income_tax,
-    otherDeductions: salary.other_deductions
+    // 财务设置项
+    basicSalary: salary.basic_salary || 0,
+    allowances: salary.allowances || 0,
+    // 扣除项
+    socialSecurity: salary.social_security || 0,
+    housingFund: salary.housing_fund || 0,
+    incomeTax: salary.income_tax || 0,
+    otherDeductions: salary.other_deductions || 0
   })
   showCreateDialog.value = true
 }
@@ -737,28 +1025,27 @@ const handleCommand = async (command: string) => {
   
   try {
     switch (action) {
-      case 'approve':
-        await ElMessageBox.confirm('确定要审批通过这条薪资记录吗？', '确认操作', {
-          type: 'warning'
-        })
-        await api.patch(`/salary/records/${salaryId}/`, { status: 'approved' })
-        ElMessage.success('审批成功')
-        await loadSalaryRecords()
-        break
-          case 'pay':
-        await ElMessageBox.confirm('确定要标记为已发放吗？', '确认操作', {
-          type: 'warning'
-        })
-        await api.patch(`/salary/records/${salaryId}/`, { 
-          status: 'paid',
-          pay_date: new Date().toISOString().split('T')[0]
-        })
-        ElMessage.success('标记成功')
-        await loadSalaryRecords()
-        break
-        
       case 'export':
         await salaryService.exportSingleSalary(salaryId)
+        break
+        
+      case 'delete':
+        // 找到对应的薪资记录
+        const salaryRecord = salaryRecords.value.find(s => s.id === salaryId)
+        if (!salaryRecord) {
+          ElMessage.error('记录不存在')
+          return
+        }
+        if (!canEdit(salaryRecord)) {
+          ElMessage.error('您没有权限删除此薪资')
+          return
+        }
+        await ElMessageBox.confirm('确定要删除这条薪资记录吗？删除后无法恢复。', '确认删除', {
+          type: 'warning'
+        })
+        await api.delete(`/salary/records/${salaryId}/`)
+        ElMessage.success('删除成功')
+        await loadSalaryRecords()
         break
     }
   } catch (error: any) {
@@ -795,6 +1082,175 @@ const handleCurrentChange = (val: number) => {
   loadSalaryRecords()
 }
 
+// 审核薪资（部门经理）
+const reviewSalary = async (row: SalaryRecord) => {
+  // 权限检查
+  if (!canReview(row) || row.status !== 'draft') {
+    ElMessage.error('您没有权限审核此薪资')
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确认审核 ${row.user_name} 的薪资吗？`,
+    '确认审核',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      saving.value = true
+      await salaryService.reviewSalary(row.id, 'approve', '')
+      ElMessage.success('审核成功')
+      loadSalaryRecords()
+    } catch (error: any) {
+      ElMessage.error(error.response?.data?.error || '审核失败')
+    } finally {
+      saving.value = false
+    }
+  }).catch(() => {
+    ElMessage.info('已取消审核')
+  })
+}
+
+// 批准薪资（财务部）
+const approveSalary = async (row: SalaryRecord) => {
+  // 权限检查
+  if (!canApprove(row)) {
+    ElMessage.error('您没有权限批准此薪资')
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确认批准 ${row.user_name} 的薪资吗？`,
+    '确认批准',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      saving.value = true
+      await salaryService.approveSalary(row.id, 'approve', '')
+      ElMessage.success('批准成功')
+      loadSalaryRecords()
+    } catch (error: any) {
+      ElMessage.error(error.response?.data?.error || '批准失败')
+    } finally {
+      saving.value = false
+    }
+  }).catch(() => {
+    ElMessage.info('已取消批准')
+  })
+}
+
+// 发放薪资（财务部）
+const paySalary = async (row: SalaryRecord) => {
+  // 权限检查
+  if (!canPay(row)) {
+    ElMessage.error('您没有权限发放此薪资')
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确认发放 ${row.user_name} 的薪资吗？`,
+    '确认发放',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'success'
+    }
+  ).then(async () => {
+    try {
+      saving.value = true
+      const today = new Date().toISOString().split('T')[0]
+      await salaryService.paySalary(row.id, today)
+      ElMessage.success('发放成功')
+      loadSalaryRecords()
+    } catch (error: any) {
+      ElMessage.error(error.response?.data?.error || '发放失败')
+    } finally {
+      saving.value = false
+    }
+  }).catch(() => {
+    ElMessage.info('已取消发放')
+  })
+}
+
+// 批量计算工资
+const handleBatchCalculate = async () => {
+  if (!batchCalculateForm.year || !batchCalculateForm.month) {
+    ElMessage.error('请选择年份和月份')
+    return
+  }
+  
+  calculating.value = true
+  try {
+    const result = await salaryService.batchCalculateSalary({
+      year: batchCalculateForm.year,
+      month: batchCalculateForm.month
+    })
+    
+    const { summary, results } = result
+    
+    // 显示结果消息
+    let message = `批量计算完成：成功 ${summary.success} 人`
+    if (summary.skipped > 0) {
+      message += `，跳过 ${summary.skipped} 人`
+    }
+    if (summary.failed > 0) {
+      message += `，失败 ${summary.failed} 人`
+    }
+    
+    if (summary.failed > 0) {
+      ElMessage.warning(message)
+      console.error('计算失败的员工:', results.failed)
+    } else {
+      ElMessage.success(message)
+    }
+    
+    showBatchCalculateDialog.value = false
+    await loadSalaryRecords()
+  } catch (error: any) {
+    console.error('批量计算失败:', error)
+    ElMessage.error(error.response?.data?.error || '批量计算失败')
+  } finally {
+    calculating.value = false
+  }
+}
+
+// 重新计算单个员工工资
+const recalculateSalary = async (salary: any) => {
+  if (!salary || !canEdit(salary)) {
+    ElMessage.error('无法重新计算此工资记录')
+    return
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      '确定要重新计算此工资记录吗？将根据最新的绩效和考勤数据重新计算。',
+      '确认重新计算',
+      { type: 'warning' }
+    )
+    
+    calculating.value = true
+    const result = await salaryService.recalculateSalary(salary.id)
+    
+    ElMessage.success('重新计算完成')
+    selectedSalary.value = result.salary_record
+    await loadSalaryRecords()
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      console.error('重新计算失败:', error)
+      ElMessage.error(error.response?.data?.error || '重新计算失败')
+    }
+  } finally {
+    calculating.value = false
+  }
+}
+
 // 初始化
 onMounted(() => {
   // 从路由查询中预填筛选条件，便于从员工列表跳转
@@ -808,6 +1264,12 @@ onMounted(() => {
   if (typeof month === 'string' && !Number.isNaN(Number(month))) {
     searchForm.month = Number(month)
   }
+  
+  // 确保用户信息已加载（特别是在刷新页面时）
+  if (!authStore.user) {
+    authStore.fetchUserInfo()
+  }
+  
   loadDepartmentEmployees()
   loadSalaryRecords()
 })

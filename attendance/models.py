@@ -86,6 +86,12 @@ class AttendanceException(models.Model):
     exception_type = models.CharField(max_length=10, choices=EXCEPTION_TYPE_CHOICES, verbose_name='异常类型')
     exception_date = models.DateField(verbose_name='异常日期')
     reason = models.TextField(verbose_name='申请原因')
+    
+    # 加班相关字段
+    overtime_hours = models.FloatField(null=True, blank=True, verbose_name='加班时长(小时)')
+    overtime_start_time = models.TimeField(null=True, blank=True, verbose_name='加班开始时间')
+    overtime_end_time = models.TimeField(null=True, blank=True, verbose_name='加班结束时间')
+    
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', verbose_name='审批状态')
     approver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, 
                                 related_name='approved_exceptions', verbose_name='审批人')

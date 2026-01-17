@@ -38,11 +38,42 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            # 只有管理员可以管理用户
-            if not getattr(self.request.user, 'is_admin', False):
-                return [permissions.IsAdminUser()]
-        return super().get_permissions()
+        # 所有操作都需要认证
+        return [permissions.IsAuthenticated()]
+    
+    def check_write_permission(self):
+        """检查写操作权限"""
+        user = self.request.user
+        # 管理员和经理可以进行写操作
+        return getattr(user, 'is_admin', False) or getattr(user, 'is_manager', False)
+    
+    def create(self, request, *args, **kwargs):
+        """创建用户 - 只有管理员和经理可以"""
+        if not self.check_write_permission():
+            return Response(
+                {'detail': '只有管理员和部门经理可以创建用户'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().create(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        """更新用户 - 只有管理员和经理可以"""
+        if not self.check_write_permission():
+            return Response(
+                {'detail': '只有管理员和部门经理可以修改用户'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().update(request, *args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        """删除用户 - 只有管理员可以"""
+        user = self.request.user
+        if not getattr(user, 'is_admin', False):
+            return Response(
+                {'detail': '只有管理员可以删除用户'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().destroy(request, *args, **kwargs)
 
     def get_queryset(self):
         user = self.request.user

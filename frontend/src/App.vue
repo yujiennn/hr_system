@@ -11,9 +11,9 @@ import { useAuthStore } from '@/stores/counter'
 
 const userStore = useAuthStore()
 
-onMounted(() => {
+onMounted(async () => {
   // 初始化用户认证状态
-  userStore.initAuth()
+  await userStore.initAuth()
 })
 </script>
 

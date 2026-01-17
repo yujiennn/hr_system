@@ -6,6 +6,7 @@ router = DefaultRouter()
 router.register(r'records', views.SalaryRecordViewSet)
 router.register(r'structures', views.SalaryStructureViewSet)
 router.register(r'items', views.SalaryItemViewSet)
+router.register(r'config', views.SalaryConfigViewSet)
 
 urlpatterns = [
     path('my-salary/', views.MySalaryView.as_view(), name='my_salary'),

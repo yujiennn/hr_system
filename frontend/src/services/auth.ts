@@ -32,15 +32,12 @@ export interface UserInfo {
   work_experience?: string
   skills?: string
   bio?: string
+  is_finance_department?: boolean
 }
 
 export interface LoginResponse {
-  message: string
-  user: UserInfo
-  tokens: {
-    access: string
-    refresh: string
-  }
+  access: string
+  refresh: string
 }
 
 class AuthService {  // 登录
@@ -50,19 +47,23 @@ class AuthService {  // 登录
       console.log('AuthService: API基地址:', api.defaults.baseURL)
       console.log('AuthService: 请求数据:', data)
       
-      const response = await api.post('/auth/login/', data)
+      // 先清除旧的 token，确保不会混淆
+      sessionStorage.removeItem('access_token')
+      sessionStorage.removeItem('refresh_token')
+      
+      const response = await api.post('/users/token/', data)
       console.log('AuthService: 登录响应状态:', response.status)
       console.log('AuthService: 登录响应数据:', response.data)
       
-      const { tokens } = response.data
+      const { access, refresh } = response.data
       
-      if (!tokens || !tokens.access) {
-        throw new Error('服务器返回的数据格式不正确：缺少tokens')
+      if (!access) {
+        throw new Error('服务器返回的数据格式不正确：缺少access token')
       }
       
-      // 保存 token 到本地存储
-      localStorage.setItem('access_token', tokens.access)
-      localStorage.setItem('refresh_token', tokens.refresh)
+      // 保存新 token 到 sessionStorage（每个标签页独立）
+      sessionStorage.setItem('access_token', access)
+      sessionStorage.setItem('refresh_token', refresh)
       
       return response.data
     } catch (error: any) {
@@ -83,23 +84,23 @@ class AuthService {  // 登录
 
   // 登出
   async logout(): Promise<void> {
-    const refreshToken = localStorage.getItem('refresh_token')
+    const refreshToken = sessionStorage.getItem('refresh_token')
     if (refreshToken) {
       try {
-        await api.post('/auth/logout/', { refresh_token: refreshToken })
+        await api.post('/users/logout/', { refresh_token: refreshToken })
       } catch (error: any) {
         console.error('Logout error:', error)
       }
     }
     
-    // 清除本地存储
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    // 清除当前标签页的存储
+    sessionStorage.removeItem('access_token')
+    sessionStorage.removeItem('refresh_token')
   }
 
   // 获取当前用户信息
   async getCurrentUser(): Promise<UserInfo> {
-    const response = await api.get('/auth/profile/')
+    const response = await api.get('/users/profile/')
     return response.data
   }
   // 更新用户信息
@@ -108,7 +109,7 @@ class AuthService {  // 登录
     console.log('AuthService.updateProfile - 数据类型检查:', typeof data)
     console.log('AuthService.updateProfile - 数据键值:', Object.keys(data))
     
-    const response = await api.put('/auth/profile/', data)
+    const response = await api.put('/users/profile/', data)
     console.log('AuthService.updateProfile - 响应:', response.data)
     return response.data
   }
@@ -119,17 +120,17 @@ class AuthService {  // 登录
     new_password: string
     confirm_password: string
   }): Promise<void> {
-    await api.post('/auth/change-password/', data)
+    await api.post('/users/change-password/', data)
   }
 
   // 检查是否已登录
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('access_token')
+    return !!sessionStorage.getItem('access_token')
   }
 
   // 获取 token
   getToken(): string | null {
-    return localStorage.getItem('access_token')
+    return sessionStorage.getItem('access_token')
   }
 }
 

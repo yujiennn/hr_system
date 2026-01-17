@@ -68,52 +68,52 @@ export interface UserListResponse {
 
 // 获取用户列表
 export const getUserList = async (params?: UserListParams): Promise<UserListResponse> => {
-  const response = await api.get('/auth/users/', { params })
+  const response = await api.get('/users/users/', { params })
   return response.data
 }
 
 // 获取用户详情
 export const getUserDetail = async (id: number): Promise<User> => {
-  const response = await api.get(`/auth/users/${id}/`)
+  const response = await api.get(`/users/users/${id}/`)
   return response.data
 }
 
 // 创建用户
 export const createUser = async (data: UserCreateData): Promise<User> => {
-  const response = await api.post('/auth/users/', data)
+  const response = await api.post('/users/users/', data)
   return response.data
 }
 
 // 更新用户
 export const updateUser = async (id: number, data: Partial<UserCreateData>): Promise<User> => {
-  const response = await api.patch(`/auth/users/${id}/`, data)
+  const response = await api.patch(`/users/users/${id}/`, data)
   return response.data
 }
 
 // 删除用户
 export const deleteUser = async (id: number): Promise<void> => {
-  await api.delete(`/auth/users/${id}/`)
+  await api.delete(`/users/users/${id}/`)
 }
 
 // 激活用户
 export const activateUser = async (id: number): Promise<void> => {
-  await api.post(`/auth/users/${id}/activate/`)
+  await api.post(`/users/users/${id}/activate/`)
 }
 
 // 停用用户
 export const deactivateUser = async (id: number): Promise<void> => {
-  await api.post(`/auth/users/${id}/deactivate/`)
+  await api.post(`/users/users/${id}/deactivate/`)
 }
 
 // 重置用户密码
 export const resetUserPassword = async (id: number): Promise<{ password: string }> => {
-  const response = await api.post(`/auth/users/${id}/reset_password/`)
+  const response = await api.post(`/users/users/${id}/reset_password/`)
   return response.data
 }
 
 // 获取部门列表
 export const getDepartmentList = async () => {
-  const response = await api.get('/auth/departments/')
+  const response = await api.get('/users/departments/')
   return response.data
 }
 
@@ -127,7 +127,7 @@ export const updateProfile = async (data: {
   hire_date?: string
   [key: string]: any
 }): Promise<User> => {
-  const response = await api.patch('/auth/profile/', data)
+  const response = await api.patch('/users/profile/', data)
   return response.data
 }
 
@@ -136,7 +136,7 @@ export const changeUserPassword = async (data: {
   old_password: string
   new_password: string
 }): Promise<void> => {
-  await api.post('/auth/change-password/', data)
+  await api.post('/users/change-password/', data)
 }
 
 // 上传头像
@@ -149,7 +149,7 @@ export const uploadAvatar = async (file: File): Promise<User> => {
   console.log('FormData 创建完成，开始发送请求...')
   
   try {
-    const response = await api.put('/auth/profile/', formData, {
+    const response = await api.put('/users/profile/', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -187,25 +187,25 @@ export interface FaceRecognitionResponse {
 
 // 人脸录入
 export const registerFace = async (data: FaceRegistrationData): Promise<any> => {
-  const response = await api.post('/auth/face/register/', data)
+  const response = await api.post('/users/face/register/', data)
   return response.data
 }
 
 // 人脸识别
 export const recognizeFace = async (data: FaceRecognitionData): Promise<FaceRecognitionResponse> => {
-  const response = await api.post('/auth/face/recognize/', data)
+  const response = await api.post('/users/face/recognize/', data)
   return response.data
 }
 
 // 获取人脸状态
 export const getFaceStatus = async (): Promise<{ data: FaceStatusResponse }> => {
-  const response = await api.get('/auth/face/status/')
+  const response = await api.get('/users/face/status/')
   return response.data
 }
 
 // 删除人脸信息
 export const deleteFace = async (): Promise<void> => {
-  await api.delete('/auth/face/delete/')
+  await api.delete('/users/face/delete/')
 }
 
 // 导出用户服务对象
