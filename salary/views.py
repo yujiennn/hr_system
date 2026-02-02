@@ -476,13 +476,16 @@ class SalaryRecordViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='manager-review')
     def manager_review(self, request, pk=None):
         """经理审核薪资"""
-        salary_record = self.get_object()
         user = request.user
         
-        # 权限检查
+        # 权限检查：先检查用户角色
         if not user.is_manager and not user.is_admin:
             return Response({'error': '权限不足'}, status=status.HTTP_403_FORBIDDEN)
         
+        # 获取对象（对于经理，只能获取本部门的记录，否则get_object会返回404）
+        salary_record = self.get_object()
+        
+        # 额外的部门检查（以防万一）
         if not user.is_admin and salary_record.user.department != user.department:
             return Response({'error': '只能审核本部门薪资'}, status=status.HTTP_403_FORBIDDEN)
         

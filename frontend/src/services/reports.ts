@@ -147,7 +147,7 @@ class ReportsService {
   async generateReport(data: {
     name: string
     template: number
-    format: string
+    file_format: string
     parameters?: any
   }): Promise<Report> {
     const response = await api.post('/reports/reports/', data)
@@ -173,6 +173,10 @@ class ReportsService {
     name: string
     template: number
     frequency: string
+    schedule_time: string
+    formats: string[]
+    email_enabled?: boolean
+    email_recipients?: string
     parameters?: any
   }): Promise<ReportSchedule> {
     const response = await api.post('/reports/schedules/', data)

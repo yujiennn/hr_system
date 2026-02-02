@@ -15,8 +15,8 @@ const api: AxiosInstance = axios.create({
 // 请求拦截器
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 使用 sessionStorage 实现多标签页独立登录
-    const token = sessionStorage.getItem('access_token')
+    // 从 localStorage 获取 token
+    const token = localStorage.getItem('access_token')
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -56,8 +56,8 @@ api.interceptors.response.use(
     
     if (error.response?.status === 401) {
       // Token 过期或无效，清除本地存储
-      sessionStorage.removeItem('access_token')
-      sessionStorage.removeItem('refresh_token')
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       // 暂时注释掉自动跳转，用于调试
       console.warn('[API] ⚠️ 401 Unauthorized - 可能需要登录')
       // window.location.href = '/login'

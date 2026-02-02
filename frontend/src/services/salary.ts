@@ -116,6 +116,22 @@ export interface SalaryRecord {
       }
     }
   }
+  
+  // === 薪资配置信息 ===
+  salary_config?: {
+    full_attendance_bonus: number
+    performance_level_a_coefficient: number
+    performance_level_b_coefficient: number
+    performance_level_c_coefficient: number
+    performance_level_d_coefficient: number
+    performance_bonus_base_rate: number
+    late_deduction_minor: number
+    late_deduction_major: number
+    late_threshold_minutes: number
+    sick_leave_deduction_rate: number
+    personal_leave_deduction_rate: number
+    work_days_per_month: number
+  }
 }
 
 // 计算工资请求参数
@@ -312,6 +328,7 @@ class SalaryService {  // 获取部门薪资记录（经理专用）
     }
     return response.data || []
   }
+
   // 获取薪资详情
   async getSalaryDetail(id: number): Promise<SalaryRecord> {
     const response = await api.get(`/salary/records/${id}/`)

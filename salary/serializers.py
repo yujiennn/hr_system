@@ -1,5 +1,21 @@
 from rest_framework import serializers
 from .models import SalaryRecord, SalaryStructure, SalaryItem, SalaryDetail, SalaryConfig
+from users.models import Department
+
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    """部门序列化器（简化版，用于嵌入）"""
+    class Meta:
+        model = Department
+        fields = ['id', 'name']
+
+
+class UserBasicSerializer(serializers.Serializer):
+    """用户基础信息序列化器（用于薪资记录中显示员工信息）"""
+    id = serializers.IntegerField()
+    get_full_name = serializers.CharField()
+    employee_id = serializers.CharField()
+    department = DepartmentSerializer()
 
 
 class SalaryConfigSerializer(serializers.ModelSerializer):
@@ -33,6 +49,8 @@ class SalaryRecordSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     employee_id = serializers.CharField(source='user.employee_id', read_only=True)
     department_name = serializers.CharField(source='user.department.name', read_only=True)
+    # 添加完整的 user 对象序列化，包含部门信息（用于权限检查）
+    user = serializers.SerializerMethodField()
     details = SalaryDetailSerializer(many=True, read_only=True)
     
     # 绩效相关显示字段
@@ -41,6 +59,9 @@ class SalaryRecordSerializer(serializers.ModelSerializer):
     
     # 绩效评估关联信息
     performance_period_name = serializers.SerializerMethodField()
+    
+    # 薪资配置信息
+    salary_config = serializers.SerializerMethodField()
     
     class Meta:
         model = SalaryRecord
@@ -65,15 +86,46 @@ class SalaryRecordSerializer(serializers.ModelSerializer):
             # 汇总
             'gross_salary', 'net_salary', 'status', 'status_display', 'pay_date',
             'performance_period_name',
+            'salary_config',
             'note', 'created_at', 'updated_at', 'details'
         ]
         read_only_fields = ['gross_salary', 'net_salary', 'created_at', 'updated_at']
+    
+    def get_salary_config(self, obj):
+        """获取薪资配置信息"""
+        config = SalaryConfig.get_active_config()
+        return {
+            'full_attendance_bonus': float(config.full_attendance_bonus),
+            'performance_level_a_coefficient': config.performance_level_a_coefficient,
+            'performance_level_b_coefficient': config.performance_level_b_coefficient,
+            'performance_level_c_coefficient': config.performance_level_c_coefficient,
+            'performance_level_d_coefficient': config.performance_level_d_coefficient,
+            'performance_bonus_base_rate': config.performance_bonus_base_rate,
+            'late_deduction_minor': float(config.late_deduction_minor),
+            'late_deduction_major': float(config.late_deduction_major),
+            'late_threshold_minutes': config.late_threshold_minutes,
+            'sick_leave_deduction_rate': config.sick_leave_deduction_rate,
+            'personal_leave_deduction_rate': config.personal_leave_deduction_rate,
+            'work_days_per_month': config.work_days_per_month,
+        }
     
     def get_performance_period_name(self, obj):
         """获取绩效考核周期名称"""
         if obj.performance_evaluation and obj.performance_evaluation.goal:
             return obj.performance_evaluation.goal.period.name
         return None
+    
+    def get_user(self, obj):
+        """获取完整的用户信息，包含部门ID（用于前端权限检查）"""
+        return {
+            'id': obj.user.id,
+            'get_full_name': obj.user.get_full_name(),
+            'employee_id': obj.user.employee_id,
+            'department': {
+                'id': obj.user.department.id if obj.user.department else None,
+                'name': obj.user.department.name if obj.user.department else None
+            }
+        }
 
 
 class SalaryRecordCreateSerializer(serializers.ModelSerializer):

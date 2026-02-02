@@ -197,6 +197,16 @@ const router = createRouter({
           component: () => import('../views/admin/SystemConfigView.vue')
         },
         {
+          path: 'attendance',
+          name: 'admin-attendance',
+          component: () => import('../views/admin/UserManagementView.vue')
+        },
+        {
+          path: 'reports',
+          name: 'admin-reports',
+          component: () => import('../views/admin/DataReportsView.vue')
+        },
+        {
           path: 'profile',
           name: 'admin-profile',
           component: () => import('../views/admin/ProfileView.vue')

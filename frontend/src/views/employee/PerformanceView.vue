@@ -601,19 +601,30 @@ const loadEvaluations = async () => {
       page_size: pageSize.value
     }
     
+    console.log('[PerformanceView] 加载绩效评估，参数:', params)
     const response = await performanceService.getMyEvaluations(params)
+    console.log('[PerformanceView] 获取到的数据:', response)
     evaluations.value = response
     
     // 获取最新评估
     if (response.length > 0) {
       latestEvaluation.value = response[0]
+      console.log('[PerformanceView] 最新评估:', latestEvaluation.value)
       nextTick(() => {
         initRadarChart()
       })
+    } else {
+      console.warn('[PerformanceView] ⚠️ 没有返回任何评估数据!')
     }
   } catch (error: any) {
     console.error('加载绩效评估失败:', error)
-    ElMessage.error('加载绩效评估失败')
+    // 如果是认证错误（401），不显示提示
+    if (error.response?.status !== 401) {
+      ElMessage.error('加载绩效评估失败')
+    }
+    // 清空数据，避免显示过期数据
+    evaluations.value = []
+    latestEvaluation.value = null
   } finally {
     loading.value = false
   }
@@ -931,6 +942,7 @@ const handleResize = () => {
 }
 
 onMounted(() => {
+  console.log('[PerformanceView] 🎯 组件已挂载 (onMounted)')
   // 加载基础数据
   loadPeriods()
   loadTemplates()

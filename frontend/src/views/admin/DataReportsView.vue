@@ -112,7 +112,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">部门数量</div>
-                    <div class="stat-value">{{ statistics.employee_stats.by_department.length }}</div>
+                    <div class="stat-value">{{ (statistics.employee_stats.by_department || []).length }}</div>
                   </div>
                 </div>
               </el-col>
@@ -138,7 +138,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">出勤率</div>
-                    <div class="stat-value">{{ statistics.attendance_stats.present_rate }}%</div>
+                    <div class="stat-value">{{ (statistics.attendance_stats.present_rate || 0).toFixed(1) }}%</div>
                   </div>
                 </div>
               </el-col>
@@ -149,7 +149,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">迟到率</div>
-                    <div class="stat-value">{{ statistics.attendance_stats.late_rate }}%</div>
+                    <div class="stat-value">{{ (statistics.attendance_stats.late_rate || 0).toFixed(1) }}%</div>
                   </div>
                 </div>
               </el-col>
@@ -160,7 +160,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">缺勤率</div>
-                    <div class="stat-value">{{ statistics.attendance_stats.absent_rate }}%</div>
+                    <div class="stat-value">{{ (statistics.attendance_stats.absent_rate || 0).toFixed(1) }}%</div>
                   </div>
                 </div>
               </el-col>
@@ -175,7 +175,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">总金额</div>
-                    <div class="stat-value">¥{{ statistics.salary_stats.total_amount.toLocaleString() }}</div>
+                    <div class="stat-value">¥{{ (statistics.salary_stats.total_gross_salary || 0).toLocaleString() }}</div>
                   </div>
                 </div>
               </el-col>
@@ -186,7 +186,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">平均薪资</div>
-                    <div class="stat-value">¥{{ statistics.salary_stats.avg_salary.toLocaleString() }}</div>
+                    <div class="stat-value">¥{{ (statistics.salary_stats.average_gross_salary || 0).toLocaleString() }}</div>
                   </div>
                 </div>
               </el-col>
@@ -197,7 +197,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">部门数量</div>
-                    <div class="stat-value">{{ statistics.salary_stats.by_department.length }}</div>
+                    <div class="stat-value">{{ (statistics.salary_stats.by_department || []).length }}</div>
                   </div>
                 </div>
               </el-col>
@@ -208,7 +208,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">记录数</div>
-                    <div class="stat-value">{{ statistics.salary_stats.monthly_trend.length }}</div>
+                    <div class="stat-value">{{ statistics.salary_stats.total_records || 0 }}</div>
                   </div>
                 </div>
               </el-col>
@@ -234,7 +234,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">平均分数</div>
-                    <div class="stat-value">{{ statistics.performance_stats.avg_score.toFixed(1) }}</div>
+                    <div class="stat-value">{{ (statistics.performance_stats.average_score || 0).toFixed(1) }}</div>
                   </div>
                 </div>
               </el-col>
@@ -244,8 +244,8 @@
                     <el-icon><View /></el-icon>
                   </div>
                   <div class="stat-content">
-                    <div class="stat-label">评估等级</div>
-                    <div class="stat-value">{{ statistics.performance_stats.by_level.length }}</div>
+                    <div class="stat-label">完成度</div>
+                    <div class="stat-value">{{ statistics.performance_stats.completion_rate || 0 }}%</div>
                   </div>
                 </div>
               </el-col>
@@ -256,7 +256,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">月度记录</div>
-                    <div class="stat-value">{{ statistics.performance_stats.monthly_trend.length }}</div>
+                    <div class="stat-value">{{ statistics.performance_stats.total_evaluations || 0 }}</div>
                   </div>
                 </div>
               </el-col>
@@ -293,10 +293,10 @@
       <el-table :data="reports" v-loading="loadingHistory">
         <el-table-column label="报表名称" prop="name" min-width="200" />
         <el-table-column label="模板ID" prop="template" width="100" />
-        <el-table-column label="格式" prop="format" width="80" />
+        <el-table-column label="格式" prop="file_format" width="80" />
         <el-table-column label="生成时间" width="160">
           <template #default="{ row }">
-            {{ formatDate(row.created_at) }}
+            {{ formatDate(row.generated_at) }}
           </template>
         </el-table-column>
         <el-table-column label="状态" prop="status" width="100">
@@ -374,6 +374,16 @@
           </el-radio-group>
         </el-form-item>
         
+        <el-form-item label="执行时间">
+          <el-time-select
+            v-model="scheduleForm.time"
+            start="00:00"
+            step="00:15"
+            end="23:45"
+            placeholder="选择执行时间"
+          />
+        </el-form-item>
+        
         <el-form-item label="报表格式">
           <el-checkbox-group v-model="scheduleForm.formats">
             <el-checkbox label="xlsx">Excel</el-checkbox>
@@ -382,7 +392,7 @@
           </el-checkbox-group>
         </el-form-item>
         
-        <el-form-item label="邮件发送">
+        <el-form-item label="邮件通知">
           <el-switch v-model="scheduleForm.emailEnabled" />
         </el-form-item>
         
@@ -495,7 +505,35 @@ const loadData = async () => {
     ])
     
     categories.value = categoriesData
-    statistics.value = statisticsData
+    
+    // 转换后端数据结构以匹配前端期望格式
+    statistics.value = {
+      employee_stats: statisticsData.employee || {
+        total: 0,
+        active: 0,
+        inactive: 0,
+        by_department: [],
+        by_position: []
+      },
+      attendance_stats: statisticsData.attendance || {
+        total_records: 0,
+        present_rate: 0,
+        late_rate: 0,
+        absent_rate: 0,
+        monthly_trend: []
+      },
+      salary_stats: statisticsData.salary || {
+        total_amount: 0,
+        avg_salary: 0,
+        by_department: []
+      },
+      performance_stats: statisticsData.performance || {
+        total_evaluations: 0,
+        completed_evaluations: 0,
+        completion_rate: 0,
+        average_score: 0
+      }
+    }
     
     // 加载报表历史
     await loadReportHistory()
@@ -552,13 +590,19 @@ const generateReport = async () => {
     return
   }
   
+  // 验证必填项
+  if (!reportParams.format) {
+    ElMessage.error('请选择报表格式')
+    return
+  }
+  
   try {
     generating.value = true
     
     const reportData = {
       name: `${selectedTemplate.name} - ${new Date().toLocaleString()}`,
       template: selectedTemplate.id,
-      format: reportParams.format,
+      file_format: reportParams.format,
       parameters: {
         period: reportParams.period,
         dateRange: reportParams.dateRange,
@@ -574,7 +618,24 @@ const generateReport = async () => {
     
   } catch (error: any) {
     console.error('生成报表失败:', error)
-    ElMessage.error('生成报表失败')
+    
+    // 显示详细的错误信息
+    if (error.response?.data) {
+      const errorData = error.response.data
+      const errorMsg = Object.entries(errorData)
+        .map(([key, value]: [string, any]) => {
+          if (Array.isArray(value)) {
+            return `${key}: ${value.join(', ')}`
+          } else if (typeof value === 'object') {
+            return `${key}: ${JSON.stringify(value)}`
+          }
+          return `${key}: ${value}`
+        })
+        .join('; ')
+      ElMessage.error(`生成报表失败: ${errorMsg}`)
+    } else {
+      ElMessage.error('生成报表失败')
+    }
   } finally {
     generating.value = false
   }
@@ -594,7 +655,7 @@ const downloadReport = async (report: Report) => {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${report.name}.${report.format}`
+    link.download = `${report.name}.${report.file_format}`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -603,7 +664,19 @@ const downloadReport = async (report: Report) => {
     ElMessage.success('下载完成')
   } catch (error: any) {
     console.error('下载失败:', error)
-    ElMessage.error('下载失败')
+    
+    // 显示详细的错误信息
+    if (error.response?.data?.error) {
+      ElMessage.error(`下载失败: ${error.response.data.error}`)
+    } else if (error.response?.data) {
+      const errorData = error.response.data
+      const errorMsg = Object.entries(errorData)
+        .map(([key, value]: [string, any]) => `${key}: ${value}`)
+        .join('; ')
+      ElMessage.error(`下载失败: ${errorMsg}`)
+    } else {
+      ElMessage.error('下载失败')
+    }
   } finally {
     downloading.value = false
   }
@@ -637,22 +710,48 @@ const saveSchedule = async () => {
       return
     }
     
+    if (!scheduleForm.time) {
+      ElMessage.error('请选择执行时间')
+      return
+    }
+    
+    if (!scheduleForm.formats || scheduleForm.formats.length === 0) {
+      ElMessage.error('请选择至少一个报表格式')
+      return
+    }
+    
+    // 构建发送给后端的数据，字段名必须与后端模型一致
     await reportsService.createSchedule({
-      name: `定时报表`,
+      name: `定时报表 - ${scheduleForm.frequency}`,
       template: scheduleForm.template,
       frequency: scheduleForm.frequency,
-      parameters: {
-        format: scheduleForm.formats[0] || 'xlsx',
-        emailEnabled: scheduleForm.emailEnabled,
-        recipients: scheduleForm.recipients
-      }
+      schedule_time: scheduleForm.time,  // 后端期望的字段名
+      formats: scheduleForm.formats,     // 后端期望的字段名
+      email_enabled: scheduleForm.emailEnabled,  // 后端期望的字段名
+      email_recipients: scheduleForm.recipients, // 后端期望的字段名
+      parameters: {}
     })
     
     ElMessage.success('定时报表设置成功')
     showScheduleDialog.value = false
+    // 重置表单
+    scheduleForm.template = 0
+    scheduleForm.frequency = 'monthly'
+    scheduleForm.time = '09:00'
+    scheduleForm.formats = ['xlsx']
+    scheduleForm.emailEnabled = false
+    scheduleForm.recipients = ''
   } catch (error: any) {
     console.error('设置定时报表失败:', error)
-    ElMessage.error('设置失败')
+    if (error.response?.data) {
+      const errorData = error.response.data
+      const errorMsg = Object.entries(errorData)
+        .map(([key, value]: [string, any]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+        .join('; ')
+      ElMessage.error(`设置失败: ${errorMsg}`)
+    } else {
+      ElMessage.error('设置失败')
+    }
   } finally {
     saving.value = false
   }
@@ -714,8 +813,19 @@ const getStatusText = (status: string) => {
   return statusMap[status as keyof typeof statusMap] || status
 }
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleString('zh-CN')
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return '-'
+  try {
+    const date = new Date(dateStr)
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) {
+      return '-'
+    }
+    return date.toLocaleString('zh-CN')
+  } catch (error) {
+    console.error('日期格式化失败:', dateStr, error)
+    return '-'
+  }
 }
 
 const initCharts = () => {
@@ -744,16 +854,20 @@ const initCharts = () => {
   // 部门分布图表
   if (departmentChart.value && selectedReport.value === 'employee') {
     const chart = echarts.init(departmentChart.value)
+    const deptData = statistics.value.employee_stats.by_department && statistics.value.employee_stats.by_department.length > 0
+      ? statistics.value.employee_stats.by_department.map((item: any) => ({
+          name: item.department || '未知',
+          value: item.count || 0
+        }))
+      : [{ name: '暂无数据', value: 100 }]
+    
     chart.setOption({
       title: { text: '部门员工分布', left: 'center' },
       tooltip: { trigger: 'item' },
       series: [{
         type: 'pie',
         radius: ['40%', '70%'],
-        data: statistics.value.employee_stats.by_department.map(item => ({
-          name: item.department,
-          value: item.count
-        })),
+        data: deptData,
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
@@ -768,32 +882,36 @@ const initCharts = () => {
   // 考勤趋势图表
   if (attendanceTrendChart.value && selectedReport.value === 'attendance') {
     const chart = echarts.init(attendanceTrendChart.value)
+    const trendData = statistics.value.attendance_stats.monthly_trend && statistics.value.attendance_stats.monthly_trend.length > 0
+      ? statistics.value.attendance_stats.monthly_trend
+      : []
+    
     chart.setOption({
       title: { text: '考勤趋势分析', left: 'center' },
       tooltip: { trigger: 'axis' },
       legend: { data: ['出勤', '迟到', '缺勤'], top: 30 },
       xAxis: {
         type: 'category',
-        data: statistics.value.attendance_stats.monthly_trend.map(item => item.month)
+        data: trendData.map((item: any) => item.month || '未知')
       },
       yAxis: { type: 'value' },
       series: [
         {
           name: '出勤',
           type: 'bar',
-          data: statistics.value.attendance_stats.monthly_trend.map(item => item.present),
+          data: trendData.map((item: any) => item.present || 0),
           itemStyle: { color: '#67C23A' }
         },
         {
           name: '迟到',
           type: 'bar',
-          data: statistics.value.attendance_stats.monthly_trend.map(item => item.late),
+          data: trendData.map((item: any) => item.late || 0),
           itemStyle: { color: '#E6A23C' }
         },
         {
           name: '缺勤',
           type: 'bar',
-          data: statistics.value.attendance_stats.monthly_trend.map(item => item.absent),
+          data: trendData.map((item: any) => item.absent || 0),
           itemStyle: { color: '#F56C6C' }
         }
       ]
@@ -803,17 +921,21 @@ const initCharts = () => {
   // 薪资分布图表
   if (salaryDistributionChart.value && selectedReport.value === 'salary') {
     const chart = echarts.init(salaryDistributionChart.value)
+    const deptData = statistics.value.salary_stats.by_department && statistics.value.salary_stats.by_department.length > 0
+      ? statistics.value.salary_stats.by_department
+      : []
+    
     chart.setOption({
       title: { text: '部门薪资分布', left: 'center' },
       tooltip: { trigger: 'axis' },
       xAxis: {
         type: 'category',
-        data: statistics.value.salary_stats.by_department.map(item => item.department)
+        data: deptData.map((item: any) => item.department || '未知')
       },
       yAxis: { type: 'value' },
       series: [{
         type: 'bar',
-        data: statistics.value.salary_stats.by_department.map(item => item.avg),
+        data: deptData.map((item: any) => item.avg || 0),
         itemStyle: { color: '#909399' }
       }]
     })

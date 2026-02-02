@@ -48,8 +48,8 @@ class AuthService {  // 登录
       console.log('AuthService: 请求数据:', data)
       
       // 先清除旧的 token，确保不会混淆
-      sessionStorage.removeItem('access_token')
-      sessionStorage.removeItem('refresh_token')
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
       
       const response = await api.post('/users/token/', data)
       console.log('AuthService: 登录响应状态:', response.status)
@@ -61,9 +61,9 @@ class AuthService {  // 登录
         throw new Error('服务器返回的数据格式不正确：缺少access token')
       }
       
-      // 保存新 token 到 sessionStorage（每个标签页独立）
-      sessionStorage.setItem('access_token', access)
-      sessionStorage.setItem('refresh_token', refresh)
+      // 保存新 token 到 localStorage
+      localStorage.setItem('access_token', access)
+      localStorage.setItem('refresh_token', refresh)
       
       return response.data
     } catch (error: any) {
@@ -93,9 +93,9 @@ class AuthService {  // 登录
       }
     }
     
-    // 清除当前标签页的存储
-    sessionStorage.removeItem('access_token')
-    sessionStorage.removeItem('refresh_token')
+    // 清除存储
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
   }
 
   // 获取当前用户信息
@@ -125,12 +125,12 @@ class AuthService {  // 登录
 
   // 检查是否已登录
   isAuthenticated(): boolean {
-    return !!sessionStorage.getItem('access_token')
+    return !!localStorage.getItem('access_token')
   }
 
   // 获取 token
   getToken(): string | null {
-    return sessionStorage.getItem('access_token')
+    return localStorage.getItem('access_token')
   }
 }
 

@@ -40,9 +40,10 @@
             <div class="amount">¥{{ formatAmount(currentSalary.gross_salary) }}</div>
             <div class="label">应发工资</div>
           </div>
-        </el-col>        <el-col :span="6">
+        </el-col>
+        <el-col :span="6">
           <div class="salary-item deduction">
-            <div class="amount">¥{{ formatAmount((currentSalary.social_security || 0) + (currentSalary.housing_fund || 0) + (currentSalary.income_tax || 0) + (currentSalary.other_deductions || 0)) }}</div>
+            <div class="amount">¥{{ currentTotalDeductions }}</div>
             <div class="label">扣除合计</div>
           </div>
         </el-col>
@@ -112,9 +113,9 @@
           <template #default="{ row }">
             ¥{{ formatAmount(row.gross_salary) }}
           </template>
-        </el-table-column>        <el-table-column prop="total_deductions" label="扣除合计" align="right" width="120">
+        </el-table-column>        <el-table-column label="扣除合计" align="right" width="120">
           <template #default="{ row }">
-            ¥{{ formatAmount((row.social_security || 0) + (row.housing_fund || 0) + (row.income_tax || 0) + (row.other_deductions || 0)) }}
+            ¥{{ formatAmount(getTotalDeductions(row as SalaryRecord)) }}
           </template>
         </el-table-column>
         <el-table-column prop="net_salary" label="实发工资" align="right" width="120">
@@ -291,6 +292,140 @@
           </el-descriptions-item>
         </el-descriptions>
         
+        <!-- 薪资计算说明 -->
+        <el-card style="margin-top: 20px;">
+          <template #header>
+            <span>薪资计算说明</span>
+          </template>
+          
+          <div v-if="selectedSalary && (selectedSalary as any).salary_config" class="calc-explanation">
+            <!-- 应发工资计算 -->
+            <div class="calc-section">
+              <h4>📊 应发工资计算</h4>
+              <div class="calc-formula">
+                <p><strong>基本公式：</strong></p>
+                <p style="background: #f5f7fa; padding: 10px; border-radius: 4px; margin: 10px 0;">
+                  应发工资 = 基本工资 + 绩效奖金 + 加班费 + 津贴补助 + 全勤奖
+                </p>
+              </div>
+              
+              <div class="calc-detail">
+                <p><strong>本月计算过程：</strong></p>
+                <table class="calc-table">
+                  <tbody>
+                    <tr>
+                      <td>基本工资</td>
+                      <td class="value">¥{{ formatAmount(selectedSalary.basic_salary) }}</td>
+                    </tr>
+                    <tr>
+                      <td>绩效奖金</td>
+                      <td class="value">
+                        ¥{{ formatAmount(selectedSalary.performance_bonus) }}
+                        <span class="note">
+                          (基本工资 × {{ selectedSalary.performance_coefficient }} × {{ ((selectedSalary.salary_config?.performance_bonus_base_rate || 0) * 100).toFixed(0) }}%)
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>加班费</td>
+                      <td class="value">¥{{ formatAmount(selectedSalary.overtime_pay) }}</td>
+                    </tr>
+                    <tr>
+                      <td>津贴补助</td>
+                      <td class="value">¥{{ formatAmount(selectedSalary.allowances) }}</td>
+                    </tr>
+                    <tr v-if="(selectedSalary?.full_attendance_bonus || 0) > 0">
+                      <td>全勤奖</td>
+                      <td class="value">¥{{ formatAmount(selectedSalary.full_attendance_bonus) }}</td>
+                    </tr>
+                    <tr class="total-row">
+                      <td><strong>应发工资合计</strong></td>
+                      <td class="value"><strong>¥{{ formatAmount(selectedSalary.gross_salary) }}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- 绩效系数说明 -->
+            <div class="calc-section" style="margin-top: 20px;">
+              <h4>⭐ 绩效等级说明</h4>
+              <div class="calc-detail">
+                <table class="calc-table">
+                  <thead>
+                    <tr>
+                      <th>等级</th>
+                      <th>绩效系数</th>
+                      <th>说明</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr :class="{ highlight: selectedSalary.performance_level === 'A' }">
+                      <td>A 优秀</td>
+                      <td>{{ selectedSalary.salary_config?.performance_level_a_coefficient || '-' }}</td>
+                      <td>绩效得分 ≥ 90 分</td>
+                    </tr>
+                    <tr :class="{ highlight: selectedSalary.performance_level === 'B' }">
+                      <td>B 良好</td>
+                      <td>{{ selectedSalary.salary_config?.performance_level_b_coefficient || '-' }}</td>
+                      <td>绩效得分 ≥ 80 分</td>
+                    </tr>
+                    <tr :class="{ highlight: selectedSalary.performance_level === 'C' }">
+                      <td>C 合格</td>
+                      <td>{{ selectedSalary.salary_config?.performance_level_c_coefficient || '-' }}</td>
+                      <td>绩效得分 ≥ 60 分</td>
+                    </tr>
+                    <tr :class="{ highlight: selectedSalary.performance_level === 'D' }">
+                      <td>D 待改进</td>
+                      <td>{{ selectedSalary.salary_config?.performance_level_d_coefficient || '-' }}</td>
+                      <td>绩效得分 < 60 分</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="margin-top: 10px; color: #606266; font-size: 12px;">
+                  本月绩效等级: <el-tag :type="getPerformanceLevelType(selectedSalary.performance_level)">
+                    {{ selectedSalary.performance_level_display || selectedSalary.performance_level || '未评定' }}
+                  </el-tag>
+                </p>
+              </div>
+            </div>
+            
+            <!-- 扣款规则说明 -->
+            <div class="calc-section" style="margin-top: 20px;">
+              <h4>📋 扣款规则说明</h4>
+              <div class="calc-detail">
+                <p><strong>迟到扣款规则：</strong></p>
+                <ul>
+                  <li>迟到 ≤ {{ selectedSalary.salary_config?.late_threshold_minutes || '-' }} 分钟：扣 ¥{{ formatAmount(selectedSalary.salary_config?.late_deduction_minor || 0) }}</li>
+                  <li>迟到 > {{ selectedSalary.salary_config?.late_threshold_minutes || '-' }} 分钟：扣 ¥{{ formatAmount(selectedSalary.salary_config?.late_deduction_major || 0) }}</li>
+                </ul>
+                <p><strong>请假扣款规则：</strong></p>
+                <ul>
+                  <li>病假：超出 2 天后，按 {{ ((selectedSalary.salary_config?.sick_leave_deduction_rate || 0) * 100).toFixed(0) }}% 日薪扣除</li>
+                  <li>事假：按 {{ ((selectedSalary.salary_config?.personal_leave_deduction_rate || 0) * 100).toFixed(0) }}% 日薪扣除</li>
+                  <li>缺勤：按 100% 日薪扣除</li>
+                </ul>
+                <p style="margin-top: 10px; color: #606266; font-size: 12px;">
+                  日薪 = 基本工资 ÷ {{ selectedSalary.salary_config?.work_days_per_month || 22 }} 天
+                </p>
+              </div>
+            </div>
+            
+            <!-- 全勤奖说明 -->
+            <div class="calc-section" style="margin-top: 20px;">
+              <h4>🎁 全勤奖说明</h4>
+              <div class="calc-detail">
+                <p>当月无迟到、早退、缺勤、请假，即可获得全勤奖：<strong>¥{{ formatAmount(selectedSalary.salary_config?.full_attendance_bonus || 0) }}</strong></p>
+                <p style="margin-top: 10px;">本月全勤状态：
+                  <el-tag :type="selectedSalary.is_full_attendance ? 'success' : 'info'">
+                    {{ selectedSalary.is_full_attendance ? '✓ 已获得全勤奖' : '✗ 未获得全勤奖' }}
+                  </el-tag>
+                </p>
+              </div>
+            </div>
+          </div>
+        </el-card>
+        
         <!-- 最终结算 -->
         <el-descriptions title="最终结算" border :column="2" style="margin-top: 20px;">
           <el-descriptions-item label="实发工资">
@@ -312,7 +447,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, nextTick, watch } from 'vue'
+import { ref, reactive, onMounted, onActivated, computed, nextTick, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import salaryService, { type SalaryRecord } from '../../services/salary'
@@ -379,6 +514,20 @@ const deductionItems = computed(() => {
     { name: '迟到扣款', amount: currentSalary.value.late_deduction || 0 },
     { name: '缺勤扣款', amount: currentSalary.value.absence_deduction || 0 }
   ].filter(item => item.amount > 0)
+})
+
+// 当前月份扣除合计（计算属性）
+const currentTotalDeductions = computed(() => {
+  if (!currentSalary.value) return '0.00'
+  const total = 
+    (parseFloat(currentSalary.value.social_security as any) || 0) +
+    (parseFloat(currentSalary.value.housing_fund as any) || 0) +
+    (parseFloat(currentSalary.value.income_tax as any) || 0) +
+    (parseFloat(currentSalary.value.other_deductions as any) || 0) +
+    (parseFloat(currentSalary.value.leave_deduction as any) || 0) +
+    (parseFloat(currentSalary.value.late_deduction as any) || 0) +
+    (parseFloat(currentSalary.value.absence_deduction as any) || 0)
+  return salaryService.formatAmount(total)
 })
 
 // 格式化金额
@@ -491,9 +640,16 @@ const loadSalaryRecords = async () => {
     // 更新图表
     nextTick(() => {
       updateChart()
-    })  } catch (error: any) {
+    })
+  } catch (error: any) {
     console.error('加载薪资记录失败:', error)
-    ElMessage.error('加载薪资记录失败')
+    // 如果是认证错误（401），不显示提示，系统会自动处理
+    if (error.response?.status !== 401) {
+      ElMessage.error('加载薪资记录失败')
+    }
+    // 清空数据，避免显示过期数据
+    salaryRecords.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
@@ -625,6 +781,13 @@ onMounted(() => {
   })
 })
 
+// 当组件被激活时重新加载数据（支持keep-alive缓存）
+onActivated(() => {
+  console.log('[SalaryView] 页面激活，重新加载数据')
+  loadCurrentSalary()
+  loadSalaryRecords()
+})
+
 // 清理
 watch(() => detailVisible.value, (newVal) => {
   if (!newVal) {
@@ -698,5 +861,93 @@ watch(() => detailVisible.value, (newVal) => {
 h4 {
   margin-bottom: 10px;
   color: #303133;
+}
+
+/* 薪资计算说明样式 */
+.calc-explanation {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.calc-section {
+  margin-bottom: 20px;
+}
+
+.calc-section h4 {
+  color: #409EFF;
+  border-bottom: 2px solid #409EFF;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+.calc-formula {
+  background: #f0f9ff;
+  border-left: 4px solid #409EFF;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.calc-detail {
+  background: #f5f7fa;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.calc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.calc-table th,
+.calc-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #dcdfe4;
+}
+
+.calc-table th {
+  background: #f0f9ff;
+  font-weight: bold;
+  color: #409EFF;
+}
+
+.calc-table tr:hover {
+  background: #f9f9f9;
+}
+
+.calc-table td.value {
+  text-align: right;
+  font-weight: bold;
+}
+
+.calc-table .note {
+  display: block;
+  font-size: 12px;
+  color: #909399;
+  font-weight: normal;
+}
+
+.calc-table .total-row {
+  background: #f0f9ff;
+  font-weight: bold;
+}
+
+.calc-detail ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.calc-detail li {
+  margin: 8px 0;
+}
+
+.calc-detail p {
+  margin: 10px 0;
+}
+
+.calc-table tr.highlight {
+  background: #fef0f0;
+  border-left: 4px solid #F56C6C;
 }
 </style>

@@ -39,6 +39,10 @@
         </el-form-item>
         
         <el-form-item>
+          <el-checkbox v-model="rememberPassword">记住密码</el-checkbox>
+        </el-form-item>
+        
+        <el-form-item>
           <el-button
             type="primary"
             class="login-btn"
@@ -62,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { OfficeBuilding, InfoFilled } from '@element-plus/icons-vue'
@@ -73,6 +77,10 @@ const userStore = useUserStore()
 
 const loginFormRef = ref<FormInstance>()
 const loading = ref(false)
+const rememberPassword = ref(false)
+
+// 存储密钥（用于简单加密）
+const STORAGE_KEY = 'hr_login_credentials'
 
 // 表单数据
 const loginForm = reactive({
@@ -91,6 +99,45 @@ const loginRules: FormRules = {
   ]
 }
 
+// 简单的加密解密函数（支持中文）
+const encodeCredentials = (username: string, password: string): string => {
+  const data = JSON.stringify({ username, password })
+  // 先用 encodeURIComponent 处理，再用 btoa
+  return btoa(encodeURIComponent(data))
+}
+
+const decodeCredentials = (encoded: string): { username: string; password: string } | null => {
+  try {
+    const data = decodeURIComponent(atob(encoded))
+    return JSON.parse(data)
+  } catch {
+    return null
+  }
+}
+
+// 保存密码
+const saveCredentials = () => {
+  if (rememberPassword.value) {
+    const encoded = encodeCredentials(loginForm.username, loginForm.password)
+    localStorage.setItem(STORAGE_KEY, encoded)
+  } else {
+    localStorage.removeItem(STORAGE_KEY)
+  }
+}
+
+// 恢复保存的密码
+const loadSavedCredentials = () => {
+  const saved = localStorage.getItem(STORAGE_KEY)
+  if (saved) {
+    const credentials = decodeCredentials(saved)
+    if (credentials) {
+      loginForm.username = credentials.username
+      loginForm.password = credentials.password
+      rememberPassword.value = true
+    }
+  }
+}
+
 // 登录处理
 const handleLogin = async () => {
   if (!loginFormRef.value) return
@@ -105,6 +152,9 @@ const handleLogin = async () => {
       
       const result = await userStore.login(loginForm.username, loginForm.password)
       console.log('登录成功，用户信息:', result)
+      
+      // 保存或清除密码
+      saveCredentials()
       
       ElMessage.success('登录成功')
       
@@ -149,6 +199,11 @@ const handleLogin = async () => {
     }
   })
 }
+
+// 页面加载时恢复保存的密码
+onMounted(() => {
+  loadSavedCredentials()
+})
 </script>
 
 <style scoped>

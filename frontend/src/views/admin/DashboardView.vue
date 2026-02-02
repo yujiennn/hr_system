@@ -416,7 +416,7 @@ const goToAttendanceManagement = () => {
 }
 
 const goToSystemConfig = () => {
-  router.push('/admin/system-config')
+  router.push('/admin/system')
 }
 
 const goToReports = () => {

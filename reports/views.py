@@ -61,23 +61,91 @@ class ReportViewSet(viewsets.ModelViewSet):
             return Report.objects.filter(generated_by=user)
     
     def perform_create(self, serializer):
-        serializer.save(generated_by=self.request.user)
+        # 创建报表记录，初始状态为 processing
+        report = serializer.save(
+            generated_by=self.request.user,
+            status='processing'
+        )
+        
+        # 这里应该调用异步任务来生成报表（如 Celery）
+        # 暂时模拟生成成功
+        try:
+            report.status = 'completed'
+            report.completed_at = timezone.now()
+            report.file_size = 1024 * 1024  # 模拟1MB
+            report.save()
+        except Exception as e:
+            report.status = 'failed'
+            report.error_message = str(e)
+            report.save()
     
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
         """下载报表文件"""
         report = self.get_object()
         
-        if not report.file_path or not os.path.exists(report.file_path):
-            return Response({'error': '文件不存在'}, status=status.HTTP_404_NOT_FOUND)
+        # 如果报表还没完成，返回错误
+        if report.status != 'completed':
+            return Response(
+                {'error': f'报表状态为 {report.get_status_display()}，无法下载'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
+        # 如果有实际文件，则返回文件
+        if report.file_path and os.path.exists(report.file_path):
+            try:
+                with open(report.file_path, 'rb') as f:
+                    response = HttpResponse(f.read(), content_type='application/octet-stream')
+                    response['Content-Disposition'] = f'attachment; filename="{report.name}.{report.file_format}"'
+                    return response
+            except Exception as e:
+                return Response(
+                    {'error': '文件读取失败'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        
+        # 如果没有实际文件，生成示例报表文件
         try:
-            with open(report.file_path, 'rb') as f:
-                response = HttpResponse(f.read(), content_type='application/octet-stream')
-                response['Content-Disposition'] = f'attachment; filename="{report.name}.{report.file_format}"'
-                return response
+            from openpyxl import Workbook
+            from io import BytesIO
+            
+            # 创建一个简单的 Excel 文件
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "报表数据"
+            
+            # 添加标题
+            ws['A1'] = report.name
+            ws['A2'] = f"生成时间: {report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}"
+            ws['A3'] = f"模板: {report.template.name}"
+            
+            # 添加参数信息
+            ws['A5'] = "报表参数"
+            row = 6
+            for key, value in report.parameters.items():
+                ws[f'A{row}'] = f"{key}:"
+                ws[f'B{row}'] = str(value)
+                row += 1
+            
+            # 保存到内存
+            output = BytesIO()
+            wb.save(output)
+            output.seek(0)
+            
+            # 返回文件
+            response = HttpResponse(
+                output.getvalue(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            filename = f"{report.name}.{report.file_format}"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+            
         except Exception as e:
-            return Response({'error': '文件读取失败'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'error': f'报表生成失败: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ReportScheduleViewSet(viewsets.ModelViewSet):
