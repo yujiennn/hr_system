@@ -21,7 +21,8 @@ export const useAuthStore = defineStore('auth', () => {
       return (user.value as any).is_finance_department
     }
     // 备用：本地检查部门名称
-    const deptName = user.value.department?.name || ''
+    const dept = user.value.department
+    const deptName = typeof dept === 'object' && dept !== null ? dept.name : ''
     return ['财务部', '财务', 'Finance', 'FINANCE'].includes(deptName)
   })
 

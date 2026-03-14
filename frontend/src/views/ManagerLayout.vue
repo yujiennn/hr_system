@@ -154,14 +154,15 @@ const getBreadcrumbTitle = () => {
 }
 
 .header {
-  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
   border-bottom: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 12px rgba(6, 182, 212, 0.25);
+  height: 56px;
 }
 
 .header-left {
@@ -170,18 +171,18 @@ const getBreadcrumbTitle = () => {
 }
 
 .logo {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   margin-right: 12px;
   filter: brightness(0) invert(1);
 }
 
 .title {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
   color: #fff;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.3px;
 }
 
 .header-right {
@@ -200,78 +201,85 @@ const getBreadcrumbTitle = () => {
 }
 
 .user-info:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .username {
   margin: 0 8px;
   color: #fff;
   font-weight: 500;
+  font-size: 14px;
 }
 
 .user-info .el-icon {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #304156 0%, #263445 100%);
-  border-right: none;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-right: 1px solid var(--hr-gray-100);
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.03);
 }
 
 .sidebar-menu {
   border-right: none;
   background: transparent;
+  padding: 8px 0;
 }
 
 .sidebar-menu :deep(.el-menu-item) {
-  color: #bfcbd9;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-  margin: 4px 8px;
+  color: var(--hr-gray-600);
+  transition: all 0.25s ease;
+  margin: 2px 8px;
   border-radius: 8px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .sidebar-menu :deep(.el-menu-item:hover) {
-  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%);
-  color: #fff;
-  transform: translateX(4px);
+  background: #ecfeff;
+  color: #0891b2;
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%) !important;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(19, 194, 194, 0.4);
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(6, 182, 212, 0.3);
+  font-weight: 600;
 }
 
 .sidebar-menu :deep(.el-sub-menu__title) {
-  color: #bfcbd9;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-  margin: 4px 8px;
+  color: var(--hr-gray-600);
+  transition: all 0.25s ease;
+  margin: 2px 8px;
   border-radius: 8px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .sidebar-menu :deep(.el-sub-menu__title:hover) {
-  background: rgba(19, 194, 194, 0.2);
-  color: #fff;
+  background: #ecfeff;
+  color: #0891b2;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item) {
-  background-color: rgba(30, 45, 61, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  margin: 2px 8px;
+  margin: 2px 8px 2px 16px;
+  font-size: 13px;
+  height: 40px;
+  line-height: 40px;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu-item:hover) {
-  background: linear-gradient(135deg, #13c2c2 0%, #1890ff 100%);
-  color: #fff;
-  transform: translateX(4px);
+  background: #ecfeff;
+  color: #0891b2;
 }
 
 .main-content {
-  background: #f0f2f5;
+  background: var(--color-background-page);
   padding: 0;
   flex: 1;
   overflow-y: auto;
@@ -280,8 +288,8 @@ const getBreadcrumbTitle = () => {
 
 .breadcrumb {
   background: #fff;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e6e6e6;
-  margin-bottom: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--hr-gray-100);
+  margin-bottom: 0;
 }
 </style>

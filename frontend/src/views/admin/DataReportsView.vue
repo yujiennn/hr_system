@@ -175,7 +175,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">总金额</div>
-                    <div class="stat-value">¥{{ (statistics.salary_stats.total_gross_salary || 0).toLocaleString() }}</div>
+                    <div class="stat-value">¥{{ (statistics.salary_stats.total_amount || 0).toLocaleString() }}</div>
                   </div>
                 </div>
               </el-col>
@@ -186,7 +186,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">平均薪资</div>
-                    <div class="stat-value">¥{{ (statistics.salary_stats.average_gross_salary || 0).toLocaleString() }}</div>
+                    <div class="stat-value">¥{{ (statistics.salary_stats.avg_salary || 0).toLocaleString() }}</div>
                   </div>
                 </div>
               </el-col>
@@ -208,7 +208,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">记录数</div>
-                    <div class="stat-value">{{ statistics.salary_stats.total_records || 0 }}</div>
+                    <div class="stat-value">{{ (statistics.salary_stats as any).total_records || 0 }}</div>
                   </div>
                 </div>
               </el-col>
@@ -234,7 +234,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">平均分数</div>
-                    <div class="stat-value">{{ (statistics.performance_stats.average_score || 0).toFixed(1) }}</div>
+                    <div class="stat-value">{{ (statistics.performance_stats.avg_score || 0).toFixed(1) }}</div>
                   </div>
                 </div>
               </el-col>
@@ -245,7 +245,7 @@
                   </div>
                   <div class="stat-content">
                     <div class="stat-label">完成度</div>
-                    <div class="stat-value">{{ statistics.performance_stats.completion_rate || 0 }}%</div>
+                    <div class="stat-value">{{ (statistics.performance_stats as any).completion_rate || 0 }}%</div>
                   </div>
                 </div>
               </el-col>
@@ -508,26 +508,26 @@ const loadData = async () => {
     
     // 转换后端数据结构以匹配前端期望格式
     statistics.value = {
-      employee_stats: statisticsData.employee || {
+      employee_stats: (statisticsData as any).employee || statisticsData.employee_stats || {
         total: 0,
         active: 0,
         inactive: 0,
         by_department: [],
         by_position: []
       },
-      attendance_stats: statisticsData.attendance || {
+      attendance_stats: (statisticsData as any).attendance || statisticsData.attendance_stats || {
         total_records: 0,
         present_rate: 0,
         late_rate: 0,
         absent_rate: 0,
         monthly_trend: []
       },
-      salary_stats: statisticsData.salary || {
+      salary_stats: (statisticsData as any).salary || statisticsData.salary_stats || {
         total_amount: 0,
         avg_salary: 0,
         by_department: []
       },
-      performance_stats: statisticsData.performance || {
+      performance_stats: (statisticsData as any).performance || statisticsData.performance_stats || {
         total_evaluations: 0,
         completed_evaluations: 0,
         completion_rate: 0,
@@ -655,7 +655,7 @@ const downloadReport = async (report: Report) => {
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${report.name}.${report.file_format}`
+    link.download = `${report.name}.${(report as any).file_format || report.format}`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

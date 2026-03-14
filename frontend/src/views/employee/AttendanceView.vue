@@ -450,7 +450,7 @@ onMounted(() => {
 
 <style scoped>
 .attendance {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .card-header {
@@ -460,110 +460,123 @@ onMounted(() => {
 }
 
 .header-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .clock-section {
   text-align: center;
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .clock-section h3 {
-  margin-bottom: 20px;
-  color: #303133;
+  margin-bottom: var(--hr-space-lg);
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .clock-time {
-  margin-bottom: 30px;
+  margin-bottom: var(--hr-space-xl);
 }
 
 .current-time {
   font-size: 48px;
-  font-weight: bold;
-  color: #409EFF;
-  margin-bottom: 10px;
+  font-weight: 800;
+  color: var(--hr-primary);
+  margin-bottom: var(--hr-space-sm);
+  letter-spacing: -1px;
 }
 
 .current-date {
-  font-size: 16px;
-  color: #909399;
+  font-size: 15px;
+  color: var(--color-text-secondary);
 }
 
 .clock-buttons {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: var(--hr-space-md);
   align-items: center;
 }
 
 .button-group {
   display: flex;
-  gap: 10px;
+  gap: var(--hr-space-sm);
   justify-content: center;
   align-items: center;
 }
 
 .clock-buttons .el-button {
-  padding: 15px 30px;
-  font-size: 16px;
+  padding: 14px 32px;
+  font-size: 15px;
   min-width: 140px;
+  border-radius: var(--hr-radius-md);
 }
 
 .today-status {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .today-status h3 {
-  margin-bottom: 20px;
-  color: #303133;
+  margin-bottom: var(--hr-space-lg);
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
-  gap: 10px;
+  margin-bottom: 14px;
+  gap: var(--hr-space-sm);
+  padding: 8px 12px;
+  border-radius: var(--hr-radius-sm);
+  transition: background var(--hr-transition-fast);
+}
+
+.status-item:hover {
+  background: var(--hr-gray-50);
 }
 
 .status-item .label {
-  color: #909399;
+  color: var(--color-text-secondary);
   width: 80px;
+  font-size: 13px;
 }
 
 .status-item .value {
-  color: #303133;
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-weight: 600;
   margin-right: 10px;
 }
 
 .no-record {
-  color: #909399;
+  color: var(--color-text-placeholder);
   font-style: italic;
 }
 
 .statistics-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stat-item {
   text-align: center;
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .stat-value {
-  font-size: 32px;
-  font-weight: bold;
-  color: #409EFF;
-  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--hr-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .stat-label {
-  color: #909399;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .pagination {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 </style>

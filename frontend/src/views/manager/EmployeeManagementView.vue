@@ -444,7 +444,7 @@ const saveEmployee = async () => {
         username: editForm.employeeId,
         password: 'temp123456', // 临时密码
         confirm_password: 'temp123456',
-        department: authStore.user?.department || 1 // 使用当前用户的部门
+        department: (typeof authStore.user?.department === 'object' ? authStore.user?.department?.id : authStore.user?.department) || 1 // 使用当前用户的部门
       }
       await createUser(newUserData)
       ElMessage.success('添加成功')
@@ -602,11 +602,11 @@ onMounted(() => {
 
 <style scoped>
 .employee-management {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .search-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .card-header {
@@ -616,12 +616,12 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .employee-detail {
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 
 :deep(.el-table) {
@@ -629,6 +629,6 @@ onMounted(() => {
 }
 
 :deep(.el-dialog__body) {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 </style>

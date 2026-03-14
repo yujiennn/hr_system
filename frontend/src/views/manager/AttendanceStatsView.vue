@@ -887,19 +887,26 @@ onMounted(async () => {
 
 <style scoped>
 .attendance-stats {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stats-overview {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stat-card {
   height: 120px;
+  border-radius: var(--hr-radius-md);
+  transition: all var(--hr-transition-normal);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--hr-shadow-card-hover);
 }
 
 .stat-content {
@@ -909,32 +916,32 @@ onMounted(async () => {
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--hr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
+  margin-right: var(--hr-space-md);
 }
 
 .stat-icon.attendance {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--hr-primary), var(--hr-info));
   color: white;
 }
 
 .stat-icon.present {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #ec4899, var(--hr-danger));
   color: white;
 }
 
 .stat-icon.late {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, var(--hr-primary-light), #06b6d4);
   color: white;
 }
 
 .stat-icon.rate {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, var(--hr-success), #10b981);
   color: white;
 }
 
@@ -944,18 +951,19 @@ onMounted(async () => {
 
 .stat-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #303133;
+  font-weight: 800;
+  color: var(--color-text-primary);
   margin-bottom: 4px;
+  letter-spacing: -0.5px;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 .charts-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .chart-container {
@@ -969,23 +977,24 @@ onMounted(async () => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .late-time {
-  color: #E6A23C;
-  font-weight: bold;
+  color: var(--hr-warning);
+  font-weight: 700;
 }
 
 .early-time {
-  color: #F56C6C;
-  font-weight: bold;
+  color: var(--hr-danger);
+  font-weight: 700;
 }
 
 .no-selection {
   text-align: center;
   padding: 40px 0;
+  color: var(--color-text-secondary);
 }
 
 :deep(.el-table) {

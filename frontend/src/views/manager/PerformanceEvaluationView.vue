@@ -1082,7 +1082,7 @@ onMounted(async () => {
 
    // 如果从员工列表跳转，使用路由查询参数预筛选员工
   if (typeof route.query.employee_id === 'string' && !Number.isNaN(Number(route.query.employee_id))) {
-    filterForm.employeeId = Number(route.query.employee_id)
+    filterForm.employeeId = String(route.query.employee_id)
   }
   
   // 加载评估列表
@@ -1092,70 +1092,78 @@ onMounted(async () => {
 
 <style scoped>
 .performance-evaluation {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .header-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .header-content h2 {
   margin: 0 0 8px 0;
-  color: #303133;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .header-content p {
   margin: 0;
-  color: #606266;
+  color: var(--color-text-regular);
 }
 
 .tab-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stats-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stat-card {
   height: 120px;
+  border-radius: var(--hr-radius-md);
+  transition: all var(--hr-transition-normal);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--hr-shadow-card-hover);
 }
 
 .stat-content {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: var(--hr-space-md);
 }
 
 .stat-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--hr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
+  margin-right: var(--hr-space-md);
   color: white;
 }
 
 .stat-icon.pending {
-  background: linear-gradient(135deg, #E6A23C 0%, #F39C12 100%);
+  background: linear-gradient(135deg, var(--hr-warning), #d97706);
 }
 
 .stat-icon.completed {
-  background: linear-gradient(135deg, #67C23A 0%, #27AE60 100%);
+  background: linear-gradient(135deg, var(--hr-success), #16a34a);
 }
 
 .stat-icon.average {
-  background: linear-gradient(135deg, #409EFF 0%, #3498DB 100%);
+  background: linear-gradient(135deg, var(--hr-primary), var(--hr-primary-dark));
 }
 
 .stat-icon.excellent {
-  background: linear-gradient(135deg, #F56C6C 0%, #E74C3C 100%);
+  background: linear-gradient(135deg, var(--hr-danger), #dc2626);
 }
 
 .stat-info {
@@ -1164,18 +1172,19 @@ onMounted(async () => {
 
 .stat-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #303133;
+  font-weight: 800;
+  color: var(--color-text-primary);
   margin-bottom: 4px;
+  letter-spacing: -0.5px;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 .charts-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .chart-container {
@@ -1189,64 +1198,70 @@ onMounted(async () => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .evaluation-detail {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .score-item {
   text-align: center;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  padding: var(--hr-space-lg);
+  background: var(--hr-gray-50);
+  border-radius: var(--hr-radius-md);
   margin-bottom: 10px;
+  transition: all var(--hr-transition-fast);
+}
+
+.score-item:hover {
+  background: var(--hr-gray-100);
 }
 
 .score-label {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: var(--color-text-secondary);
   margin-bottom: 8px;
 }
 
 .score-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: var(--color-text-primary);
 }
 
 .comment-section {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
 }
 
 .comment-section p {
   padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: var(--hr-gray-50);
+  border-radius: var(--hr-radius-md);
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.7;
+  color: var(--color-text-regular);
 }
 
 .score-excellent {
-  color: #67C23A;
-  font-weight: bold;
+  color: var(--hr-success);
+  font-weight: 700;
 }
 
 .score-good {
-  color: #409EFF;
-  font-weight: bold;
+  color: var(--hr-primary);
+  font-weight: 700;
 }
 
 .score-normal {
-  color: #E6A23C;
-  font-weight: bold;
+  color: var(--hr-warning);
+  font-weight: 700;
 }
 
 .score-poor {
-  color: #F56C6C;
-  font-weight: bold;
+  color: var(--hr-danger);
+  font-weight: 700;
 }
 
 :deep(.el-table) {

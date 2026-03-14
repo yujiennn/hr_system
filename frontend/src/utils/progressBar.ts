@@ -1,4 +1,4 @@
-import { App, createApp } from 'vue'
+import { type App, createApp } from 'vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 
 let progressBarInstance: any = null

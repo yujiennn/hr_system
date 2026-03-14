@@ -483,7 +483,7 @@ onMounted(() => {
 
 <style scoped>
 .system-settings {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .page-header .header-content {
@@ -494,8 +494,9 @@ onMounted(() => {
 
 .page-header .header-content h2 {
   margin: 0;
-  font-size: 24px;
-  color: #303133;
+  font-size: 22px;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .card-header {
@@ -505,7 +506,7 @@ onMounted(() => {
 }
 
 .form-text {
-  color: #909399;
+  color: var(--color-text-secondary);
   font-size: 12px;
   margin-left: 10px;
 }
@@ -514,24 +515,24 @@ onMounted(() => {
   margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 .tip-text {
-  color: #909399;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 :deep(.el-card__header) {
-  background-color: #f8f9fa;
+  background-color: var(--hr-gray-50);
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 
 :deep(.el-form-item__label) {
@@ -543,12 +544,12 @@ onMounted(() => {
 }
 
 :deep(.el-dialog__header) {
-  background-color: #f8f9fa;
+  background-color: var(--hr-gray-50);
   padding: 20px 20px 10px;
 }
 
 :deep(.el-dialog__title) {
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 </style>

@@ -81,15 +81,16 @@ const handleClick = () => {
 <style scoped>
 .stat-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--hr-radius-lg);
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border-left: 4px solid transparent;
+  box-shadow: var(--hr-shadow-card);
+  transition: all var(--hr-transition-slow);
+  border-left: 3px solid transparent;
   cursor: default;
+  border: 1px solid var(--hr-gray-100);
 }
 
 .stat-card.clickable {
@@ -97,33 +98,28 @@ const handleClick = () => {
 }
 
 .stat-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
+  box-shadow: var(--hr-shadow-card-hover);
+  transform: translateY(-3px);
 }
 
 .stat-card.type-primary {
-  border-left-color: #409eff;
-  background: linear-gradient(135deg, #fff 0%, #e6f4ff 100%);
+  border-left-color: var(--hr-primary);
 }
 
 .stat-card.type-success {
-  border-left-color: #67c23a;
-  background: linear-gradient(135deg, #fff 0%, #f0f9e8 100%);
+  border-left-color: var(--hr-success);
 }
 
 .stat-card.type-warning {
-  border-left-color: #e6a23c;
-  background: linear-gradient(135deg, #fff 0%, #fef7e6 100%);
+  border-left-color: var(--hr-warning);
 }
 
 .stat-card.type-danger {
-  border-left-color: #f56c6c;
-  background: linear-gradient(135deg, #fff 0%, #fef0f0 100%);
+  border-left-color: var(--hr-danger);
 }
 
 .stat-card.type-info {
-  border-left-color: #909399;
-  background: linear-gradient(135deg, #fff 0%, #f5f7fa 100%);
+  border-left-color: var(--hr-gray-400);
 }
 
 .stat-icon-wrapper {
@@ -131,34 +127,33 @@ const handleClick = () => {
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--hr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .type-primary .stat-icon {
-  background: linear-gradient(135deg, #409eff 0%, #5a7bf5 100%);
+  background: linear-gradient(135deg, #4f6ef7 0%, #6366f1 100%);
 }
 
 .type-success .stat-icon {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
 }
 
 .type-warning .stat-icon {
-  background: linear-gradient(135deg, #e6a23c 0%, #f0b452 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
 .type-danger .stat-icon {
-  background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 .type-info .stat-icon {
-  background: linear-gradient(135deg, #909399 0%, #b3b6bc 100%);
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
 }
 
 .stat-content {
@@ -174,21 +169,22 @@ const handleClick = () => {
 }
 
 .stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #303133;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--hr-gray-800);
   line-height: 1;
+  letter-spacing: -0.5px;
 }
 
 .stat-unit {
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--hr-gray-400);
   font-weight: 400;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #606266;
+  font-size: 13px;
+  color: var(--hr-gray-500);
   margin-bottom: 6px;
 }
 
@@ -197,22 +193,23 @@ const handleClick = () => {
   align-items: center;
   gap: 4px;
   font-size: 12px;
+  font-weight: 500;
 }
 
 .stat-trend.trend-up {
-  color: #67c23a;
+  color: var(--hr-success);
 }
 
 .stat-trend.trend-down {
-  color: #f56c6c;
+  color: var(--hr-danger);
 }
 
 .stat-trend.trend-neutral {
-  color: #909399;
+  color: var(--hr-gray-400);
 }
 
 .trend-label {
   margin-left: 4px;
-  color: #909399;
+  color: var(--hr-gray-400);
 }
 </style>

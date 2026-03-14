@@ -722,59 +722,75 @@ onMounted(async () => {
 
 <style scoped>
 .leave-approval {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stats-row {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .stats-card {
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--hr-transition-normal);
+  border-radius: var(--hr-radius-md);
 }
 
 .stats-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: var(--hr-shadow-card-hover);
 }
 
 .stats-card.pending {
-  border-left: 4px solid #E6A23C;
+  border-left: 3px solid var(--hr-warning);
 }
 
 .stats-card.approved {
-  border-left: 4px solid #67C23A;
+  border-left: 3px solid var(--hr-success);
 }
 
 .stats-card.rejected {
-  border-left: 4px solid #F56C6C;
+  border-left: 3px solid var(--hr-danger);
 }
 
 .stats-card.total {
-  border-left: 4px solid #409EFF;
+  border-left: 3px solid var(--hr-primary);
 }
 
 .stats-content {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: var(--hr-space-md);
 }
 
 .stats-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--hr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin-right: var(--hr-space-md);
   color: white;
+}
+
+.stats-card.pending .stats-icon {
+  background: linear-gradient(135deg, var(--hr-warning), #d97706);
+}
+
+.stats-card.approved .stats-icon {
+  background: linear-gradient(135deg, var(--hr-success), #16a34a);
+}
+
+.stats-card.rejected .stats-icon {
+  background: linear-gradient(135deg, var(--hr-danger), #dc2626);
+}
+
+.stats-card.total .stats-icon {
+  background: linear-gradient(135deg, var(--hr-primary), var(--hr-primary-dark));
 }
 
 .stats-info {
@@ -783,14 +799,15 @@ onMounted(async () => {
 
 .stats-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #303133;
+  font-weight: 800;
+  color: var(--color-text-primary);
   margin-bottom: 4px;
+  letter-spacing: -0.5px;
 }
 
 .stats-label {
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 .card-header {
@@ -800,20 +817,20 @@ onMounted(async () => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .leave-detail {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .approval-actions {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
 }
 
 .batch-content {
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 
 :deep(.el-table) {
@@ -821,6 +838,6 @@ onMounted(async () => {
 }
 
 :deep(.el-descriptions__body) {
-  background-color: #fafafa;
+  background-color: var(--hr-gray-50);
 }
 </style>

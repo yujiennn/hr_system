@@ -1,53 +1,70 @@
-/* color palette from <https://github.com/vuejs/theme> */
+/* ===== HR 智慧员工运营系统 - 设计令牌 ===== */
 :root {
-  --vt-c-white: #ffffff;
-  --vt-c-white-soft: #f8f8f8;
-  --vt-c-white-mute: #f2f2f2;
+  /* 品牌主色 */
+  --hr-primary: #4f6ef7;
+  --hr-primary-light: #7b93fa;
+  --hr-primary-dark: #3a56d4;
+  --hr-primary-bg: #eef2ff;
 
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
+  /* 功能色 */
+  --hr-success: #22c55e;
+  --hr-success-bg: #ecfdf5;
+  --hr-warning: #f59e0b;
+  --hr-warning-bg: #fffbeb;
+  --hr-danger: #ef4444;
+  --hr-danger-bg: #fef2f2;
+  --hr-info: #6366f1;
+  --hr-info-bg: #eef2ff;
 
-  --vt-c-indigo: #2c3e50;
+  /* 中性色阶 */
+  --hr-gray-50: #f9fafb;
+  --hr-gray-100: #f3f4f6;
+  --hr-gray-200: #e5e7eb;
+  --hr-gray-300: #d1d5db;
+  --hr-gray-400: #9ca3af;
+  --hr-gray-500: #6b7280;
+  --hr-gray-600: #4b5563;
+  --hr-gray-700: #374151;
+  --hr-gray-800: #1f2937;
+  --hr-gray-900: #111827;
 
-  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
-  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
+  /* 语义色 */
+  --color-background: #ffffff;
+  --color-background-soft: #f9fafb;
+  --color-background-page: #f0f2f5;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+  --color-text-primary: #1f2937;
+  --color-text-regular: #4b5563;
+  --color-text-secondary: #6b7280;
+  --color-text-placeholder: #9ca3af;
 
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
-  --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
-}
+  /* 圆角 */
+  --hr-radius-sm: 6px;
+  --hr-radius-md: 10px;
+  --hr-radius-lg: 14px;
+  --hr-radius-xl: 20px;
 
-/* semantic color variables for this project */
-:root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+  /* 阴影 */
+  --hr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --hr-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --hr-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --hr-shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.12);
+  --hr-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --hr-shadow-card-hover: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
 
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
+  /* 间距 */
+  --hr-space-xs: 4px;
+  --hr-space-sm: 8px;
+  --hr-space-md: 16px;
+  --hr-space-lg: 24px;
+  --hr-space-xl: 32px;
+  --hr-space-2xl: 48px;
 
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
-
-  --section-gap: 160px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
+  /* 动画 */
+  --hr-transition-fast: 0.15s ease;
+  --hr-transition-normal: 0.25s ease;
+  --hr-transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -55,7 +72,6 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
-  font-weight: normal;
 }
 
 html, body {
@@ -63,44 +79,59 @@ html, body {
   margin: 0;
   padding: 0;
   font-family:
-    'Segoe UI',
     -apple-system,
     BlinkMacSystemFont,
+    'Segoe UI',
     Roboto,
+    'PingFang SC',
+    'Microsoft YaHei',
     'Helvetica Neue',
     Arial,
     'Noto Sans',
     sans-serif,
     'Apple Color Emoji',
-    'Segoe UI Emoji',
-    'Segoe UI Symbol',
-    'Noto Color Emoji';
-  font-size: 15px;
+    'Segoe UI Emoji';
+  font-size: 14px;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  background-color: #f0f2f5;
+  color: var(--color-text-primary);
+  background-color: var(--color-background-page);
+}
+
+/* 选区颜色 */
+::selection {
+  background: rgba(79, 110, 247, 0.15);
+  color: inherit;
 }
 
 /* 滚动条美化 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-  transition: background 0.3s;
+  background: var(--hr-gray-300);
+  border-radius: 3px;
+  transition: background var(--hr-transition-normal);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--hr-gray-400);
+}
+
+/* 仅在悬停容器时展示滚动条 */
+.el-aside::-webkit-scrollbar-thumb,
+.el-main::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+.el-aside:hover::-webkit-scrollbar-thumb,
+.el-main:hover::-webkit-scrollbar-thumb {
+  background: var(--hr-gray-300);
 }

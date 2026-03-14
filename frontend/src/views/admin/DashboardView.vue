@@ -430,8 +430,7 @@ onMounted(async () => {
 
 <style scoped>
 .admin-dashboard {
-  padding: 20px;
-  background: #f5f7fa;
+  padding: 24px;
   min-height: calc(100vh - 120px);
 }
 
@@ -440,74 +439,69 @@ onMounted(async () => {
 }
 
 .overview-card {
-  height: 140px;
+  height: 130px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-  border-radius: 12px;
+  transition: all var(--hr-transition-slow);
+  border: 1px solid var(--hr-gray-100) !important;
+  border-radius: var(--hr-radius-lg) !important;
   overflow: hidden;
-  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  box-shadow: var(--hr-shadow-card);
 }
 
 .overview-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: var(--hr-shadow-card-hover) !important;
 }
 
 .overview-card.users {
-  border-left: 4px solid #409EFF;
-  background: linear-gradient(135deg, #fff 0%, #e6f4ff 100%);
+  border-left: 3px solid var(--hr-primary) !important;
 }
 
 .overview-card.departments {
-  border-left: 4px solid #67C23A;
-  background: linear-gradient(135deg, #fff 0%, #f0f9e8 100%);
+  border-left: 3px solid var(--hr-success) !important;
 }
 
 .overview-card.attendance {
-  border-left: 4px solid #E6A23C;
-  background: linear-gradient(135deg, #fff 0%, #fef7e6 100%);
+  border-left: 3px solid var(--hr-warning) !important;
 }
 
 .overview-card.performance {
-  border-left: 4px solid #F56C6C;
-  background: linear-gradient(135deg, #fff 0%, #fef0f0 100%);
+  border-left: 3px solid var(--hr-danger) !important;
 }
 
 .card-content {
   display: flex;
   align-items: center;
-  height: 100px;
+  height: 90px;
   padding: 0 20px;
 }
 
 .card-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--hr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20px;
+  margin-right: 18px;
   color: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .overview-card.users .card-icon {
-  background: linear-gradient(135deg, #409EFF 0%, #5a7bf5 100%);
+  background: linear-gradient(135deg, #4f6ef7 0%, #6366f1 100%);
 }
 
 .overview-card.departments .card-icon {
-  background: linear-gradient(135deg, #67C23A 0%, #85ce61 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
 }
 
 .overview-card.attendance .card-icon {
-  background: linear-gradient(135deg, #E6A23C 0%, #f0b452 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
 .overview-card.performance .card-icon {
-  background: linear-gradient(135deg, #F56C6C 0%, #f78989 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
 .card-info {
@@ -515,23 +509,25 @@ onMounted(async () => {
 }
 
 .card-value {
-  font-size: 32px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 4px;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--hr-gray-800);
+  margin-bottom: 2px;
+  letter-spacing: -0.5px;
 }
 
 .card-label {
-  font-size: 14px;
-  color: #909399;
-  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--hr-gray-500);
+  margin-bottom: 6px;
 }
 
 .card-trend {
   display: flex;
   align-items: center;
   font-size: 12px;
-  color: #67C23A;
+  color: var(--hr-success);
+  font-weight: 500;
 }
 
 .card-trend span {
@@ -540,15 +536,11 @@ onMounted(async () => {
 
 .quick-actions {
   margin-bottom: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .quick-actions :deep(.el-card__header) {
-  background: linear-gradient(to right, #fafbfc, #fff);
   font-weight: 600;
-  color: #303133;
-  border-bottom: 2px solid #f0f2f5;
+  color: var(--hr-gray-800);
 }
 
 .action-item {
@@ -556,26 +548,26 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-  border-radius: 12px;
+  padding: 20px;
+  background: var(--hr-gray-50);
+  border-radius: var(--hr-radius-md);
   cursor: pointer;
-  transition: all 0.3s ease;
-  height: 110px;
-  border: 2px solid transparent;
+  transition: all var(--hr-transition-slow);
+  height: 100px;
+  border: 1px solid var(--hr-gray-100);
 }
 
 .action-item:hover {
-  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-color: #409eff;
+  background: #fff;
+  transform: translateY(-3px);
+  box-shadow: var(--hr-shadow-md);
+  border-color: var(--hr-primary);
 }
 
 .action-label {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #303133;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--hr-gray-700);
   font-weight: 500;
 }
 
@@ -591,8 +583,8 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hr-gray-100);
 }
 
 .stat-item:last-child {
@@ -601,14 +593,14 @@ onMounted(async () => {
 
 .stat-label {
   font-weight: 500;
-  color: #303133;
+  color: var(--hr-gray-700);
   font-size: 14px;
 }
 
 .stat-value {
   font-size: 18px;
-  font-weight: 600;
-  color: #409EFF;
+  font-weight: 700;
+  color: var(--hr-primary);
 }
 
 .notification-section {
@@ -626,14 +618,14 @@ onMounted(async () => {
 
 .notification-title {
   font-weight: 600;
-  color: #303133;
+  color: var(--hr-gray-800);
   margin-bottom: 4px;
 }
 
 .notification-description {
-  font-size: 14px;
-  color: #606266;
-  line-height: 1.4;
+  font-size: 13px;
+  color: var(--hr-gray-500);
+  line-height: 1.5;
 }
 
 .system-status {
@@ -645,7 +637,7 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--hr-gray-100);
 }
 
 .status-item:last-child {
@@ -654,7 +646,7 @@ onMounted(async () => {
 
 .status-label {
   font-weight: 500;
-  color: #303133;
+  color: var(--hr-gray-700);
 }
 
 .status-value {
@@ -663,13 +655,13 @@ onMounted(async () => {
 }
 
 .online-users {
-  font-weight: 600;
-  color: #409EFF;
+  font-weight: 700;
+  color: var(--hr-primary);
 }
 
 .last-update {
   font-size: 12px;
-  color: #909399;
+  color: var(--hr-gray-400);
 }
 
 .todo-list {
@@ -680,24 +672,33 @@ onMounted(async () => {
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #909399;
+  color: var(--hr-gray-400);
 }
 
 .empty-state p {
-  margin-top: 16px;
+  margin-top: 14px;
   font-size: 14px;
+  color: var(--hr-gray-500);
 }
 
 .todo-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hr-gray-100);
+  transition: background var(--hr-transition-fast);
 }
 
 .todo-item:last-child {
   border-bottom: none;
+}
+
+.todo-item:hover {
+  background: var(--hr-gray-50);
+  margin: 0 -12px;
+  padding: 14px 12px;
+  border-radius: var(--hr-radius-sm);
 }
 
 .todo-content {
@@ -705,9 +706,10 @@ onMounted(async () => {
 }
 
 .todo-title {
-  font-weight: 500;
-  color: #303133;
-  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--hr-gray-800);
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 
 .todo-meta {
@@ -718,16 +720,10 @@ onMounted(async () => {
 
 .todo-deadline {
   font-size: 12px;
-  color: #909399;
+  color: var(--hr-gray-400);
 }
 
 :deep(.el-card__body) {
-  padding: 16px;
-}
-
-:deep(.el-card__header) {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #303133;
+  padding: 16px 20px;
 }
 </style>

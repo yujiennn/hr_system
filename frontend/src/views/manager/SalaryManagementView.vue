@@ -1277,11 +1277,11 @@ onMounted(() => {
 
 <style scoped>
 .salary-management {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .page-header {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .header-content {
@@ -1292,14 +1292,15 @@ onMounted(() => {
 
 .header-content h2 {
   margin: 0;
-  font-size: 24px;
-  color: #303133;
+  font-size: 22px;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .search-card,
 .stats-card,
 .table-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .card-header {
@@ -1310,65 +1311,73 @@ onMounted(() => {
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 .stat-item {
   text-align: center;
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .stat-value {
   font-size: 24px;
-  font-weight: bold;
-  color: #409EFF;
+  font-weight: 800;
+  color: var(--hr-primary);
   margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .stat-label {
-  color: #909399;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .calculation-preview {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
 }
 
 .calc-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 10px 12px;
+  border-radius: var(--hr-radius-sm);
+  transition: background var(--hr-transition-fast);
+}
+
+.calc-item:hover {
+  background: var(--hr-gray-50);
 }
 
 .calc-label {
   font-weight: 500;
-  color: #606266;
+  color: var(--color-text-regular);
+  font-size: 14px;
 }
 
 .calc-value {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 16px;
 }
 
 .calc-value.gross {
-  color: #409EFF;
+  color: var(--hr-primary);
 }
 
 .calc-value.deduction {
-  color: #F56C6C;
+  color: var(--hr-danger);
 }
 
 .calc-value.net {
-  color: #67C23A;
+  color: var(--hr-success);
 }
 
 .salary-detail {
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 </style>

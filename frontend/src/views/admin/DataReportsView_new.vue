@@ -558,7 +558,7 @@ const generateReport = async () => {
     const reportData = {
       name: `${selectedTemplate.name} - ${new Date().toLocaleString()}`,
       template: selectedTemplate.id,
-      format: reportParams.format,
+      file_format: reportParams.format,
       parameters: {
         period: reportParams.period,
         dateRange: reportParams.dateRange,
@@ -641,10 +641,12 @@ const saveSchedule = async () => {
       name: `定时报表`,
       template: scheduleForm.template,
       frequency: scheduleForm.frequency,
+      schedule_time: new Date().toISOString(),
+      formats: scheduleForm.formats?.length ? scheduleForm.formats : ['xlsx'],
+      email_enabled: scheduleForm.emailEnabled,
+      email_recipients: scheduleForm.recipients,
       parameters: {
-        format: scheduleForm.formats[0] || 'xlsx',
-        emailEnabled: scheduleForm.emailEnabled,
-        recipients: scheduleForm.recipients
+        format: scheduleForm.formats[0] || 'xlsx'
       }
     })
     

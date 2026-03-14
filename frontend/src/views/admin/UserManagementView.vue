@@ -1127,13 +1127,13 @@ onMounted(() => {
 
 <style scoped>
 .user-management {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .search-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: var(--hr-space-lg);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-card);
 }
 
 .card-header {
@@ -1144,34 +1144,34 @@ onMounted(() => {
 
 /* 表格优化样式 */
 .user-table {
-  border-radius: 8px;
+  border-radius: var(--hr-radius-md);
   overflow: hidden;
 }
 
 .user-table :deep(.el-table__header-wrapper) {
-  background: linear-gradient(to bottom, #f8f9fa, #f0f2f5);
+  background: linear-gradient(to bottom, var(--hr-gray-50), var(--hr-gray-100));
 }
 
 .user-table :deep(.el-table__header th) {
   background: transparent;
   font-weight: 600;
-  color: #303133;
-  font-size: 14px;
+  color: var(--color-text-primary);
+  font-size: 13px;
 }
 
 .user-table :deep(.el-table__row) {
-  transition: all 0.3s ease;
+  transition: all var(--hr-transition-normal);
   cursor: pointer;
 }
 
 .user-table :deep(.el-table__row:hover) {
-  background-color: #f5f7fa !important;
+  background-color: var(--hr-gray-50) !important;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--hr-shadow-sm);
 }
 
 .user-table :deep(.current-row) {
-  background-color: #ecf5ff !important;
+  background-color: var(--hr-primary-bg) !important;
 }
 
 .user-table :deep(.el-table__body-wrapper) {
@@ -1179,37 +1179,38 @@ onMounted(() => {
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
-  padding: 16px 0;
+  padding: var(--hr-space-md) 0;
 }
 
 .user-detail {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .user-avatar-section {
   text-align: center;
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .user-basic-info {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
 }
 
 .user-basic-info h3 {
   margin: 10px 0 5px;
-  color: #303133;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .user-basic-info p {
   margin: 5px 0 15px;
-  color: #909399;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
 .permissions-section {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .permission-tag {
@@ -1219,13 +1220,14 @@ onMounted(() => {
 .permission-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  gap: var(--hr-space-lg);
 }
 
 .permission-category h4 {
   margin: 0 0 10px;
-  color: #303133;
+  color: var(--color-text-primary);
   font-size: 14px;
+  font-weight: 600;
 }
 
 .permission-category .el-checkbox {
@@ -1238,11 +1240,11 @@ onMounted(() => {
 }
 
 :deep(.el-dialog__body) {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 :deep(.el-descriptions__body) {
-  background-color: #fafafa;
+  background-color: var(--hr-gray-50);
 }
 
 /* 自定义对话框样式 */
@@ -1252,17 +1254,18 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  backdrop-filter: blur(4px);
 }
 
 .dialog-content {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border-radius: var(--hr-radius-lg);
+  box-shadow: var(--hr-shadow-xl);
   max-width: 700px;
   width: 90%;
   max-height: 80vh;
@@ -1270,41 +1273,43 @@ onMounted(() => {
 }
 
 .dialog-header {
-  padding: 20px 20px 0 20px;
+  padding: var(--hr-space-lg) var(--hr-space-lg) 0 var(--hr-space-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--hr-space-lg);
 }
 
 .dialog-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
-  color: #999;
-  width: 30px;
-  height: 30px;
+  color: var(--color-text-placeholder);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--hr-radius-sm);
+  transition: all var(--hr-transition-fast);
 }
 
 .close-btn:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--hr-gray-100);
+  color: var(--color-text-primary);
 }
 
 .dialog-body {
-  padding: 0 20px 20px 20px;
+  padding: 0 var(--hr-space-lg) var(--hr-space-lg) var(--hr-space-lg);
 }
 
 .form-row {
@@ -1319,68 +1324,72 @@ onMounted(() => {
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text-regular);
+  font-size: 13px;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--hr-radius-sm);
   font-size: 14px;
   box-sizing: border-box;
+  transition: all var(--hr-transition-fast);
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #409EFF;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-color: var(--hr-primary);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
 }
 
 .dialog-footer {
-  padding: 20px;
-  border-top: 1px solid #eee;
+  padding: var(--hr-space-md) var(--hr-space-lg);
+  border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
 
 .btn {
-  padding: 8px 20px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 9px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--hr-radius-sm);
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 500;
+  transition: all var(--hr-transition-fast);
 }
 
 .btn-default {
   background: white;
-  color: #333;
+  color: var(--color-text-regular);
 }
 
 .btn-default:hover {
-  background: #f5f5f5;
+  background: var(--hr-gray-50);
+  border-color: var(--hr-gray-300);
 }
 
 .btn-primary {
-  background: #409EFF;
+  background: var(--hr-primary);
   color: white;
-  border-color: #409EFF;
+  border-color: var(--hr-primary);
 }
 
 .btn-primary:hover {
-  background: #337ab7;
-  border-color: #337ab7;
+  background: var(--hr-primary-dark);
+  border-color: var(--hr-primary-dark);
 }
 
 .btn-primary:disabled {
-  background: #c0c4cc;
-  border-color: #c0c4cc;
+  background: var(--hr-gray-300);
+  border-color: var(--hr-gray-300);
   cursor: not-allowed;
 }
 </style>

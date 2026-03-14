@@ -449,21 +449,28 @@ onMounted(async () => {
 
 <style scoped>
 .manager-dashboard {
-  padding: 20px;
+  padding: 24px;
 }
 
 .stats-row {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stats-card {
-  height: 120px;
+  height: 110px;
+  border: none !important;
+  transition: transform var(--hr-transition-slow), box-shadow var(--hr-transition-slow) !important;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--hr-shadow-card-hover) !important;
 }
 
 .stats-content {
   display: flex;
   align-items: center;
-  height: 80px;
+  height: 70px;
 }
 
 .stats-icon {
@@ -475,23 +482,24 @@ onMounted(async () => {
 }
 
 .stats-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 4px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--hr-gray-800);
+  margin-bottom: 2px;
+  letter-spacing: -0.5px;
 }
 
 .stats-label {
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--hr-gray-500);
 }
 
 .charts-row {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .pending-row {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .chart-container {
@@ -502,13 +510,15 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
+  color: var(--hr-gray-800);
 }
 
 :deep(.el-table) {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 :deep(.el-card__body) {
-  padding: 16px;
+  padding: 16px 20px;
 }
 </style>

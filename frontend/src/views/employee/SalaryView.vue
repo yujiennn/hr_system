@@ -798,11 +798,11 @@ watch(() => detailVisible.value, (newVal) => {
 
 <style scoped>
 .salary {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .filter-form {
@@ -810,35 +810,36 @@ watch(() => detailVisible.value, (newVal) => {
 }
 
 .current-salary {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .salary-item {
   text-align: center;
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .salary-item.gross .amount {
-  color: #409EFF;
+  color: var(--hr-primary);
 }
 
 .salary-item.deduction .amount {
-  color: #F56C6C;
+  color: var(--hr-danger);
 }
 
 .salary-item.net .amount {
-  color: #67C23A;
+  color: var(--hr-success);
 }
 
 .salary-item .amount {
-  font-size: 32px;
-  font-weight: bold;
-  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .salary-item .label {
-  color: #909399;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .salary-item .status-text {
@@ -846,51 +847,52 @@ watch(() => detailVisible.value, (newVal) => {
 }
 
 .chart-card {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
 }
 
 .pagination {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .salary-detail {
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 
 h4 {
   margin-bottom: 10px;
-  color: #303133;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 /* 薪资计算说明样式 */
 .calc-explanation {
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .calc-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .calc-section h4 {
-  color: #409EFF;
-  border-bottom: 2px solid #409EFF;
+  color: var(--hr-primary);
+  border-bottom: 2px solid var(--hr-primary);
   padding-bottom: 8px;
   margin-bottom: 15px;
 }
 
 .calc-formula {
-  background: #f0f9ff;
-  border-left: 4px solid #409EFF;
-  padding: 12px;
-  border-radius: 4px;
+  background: var(--hr-primary-bg);
+  border-left: 3px solid var(--hr-primary);
+  padding: 12px 16px;
+  border-radius: var(--hr-radius-sm);
 }
 
 .calc-detail {
-  background: #f5f7fa;
+  background: var(--hr-gray-50);
   padding: 15px;
-  border-radius: 4px;
+  border-radius: var(--hr-radius-sm);
 }
 
 .calc-table {
@@ -901,36 +903,37 @@ h4 {
 
 .calc-table th,
 .calc-table td {
-  padding: 10px;
+  padding: 10px 12px;
   text-align: left;
-  border-bottom: 1px solid #dcdfe4;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .calc-table th {
-  background: #f0f9ff;
-  font-weight: bold;
-  color: #409EFF;
+  background: var(--hr-primary-bg);
+  font-weight: 600;
+  color: var(--hr-primary);
+  font-size: 13px;
 }
 
 .calc-table tr:hover {
-  background: #f9f9f9;
+  background: var(--hr-gray-50);
 }
 
 .calc-table td.value {
   text-align: right;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .calc-table .note {
   display: block;
   font-size: 12px;
-  color: #909399;
+  color: var(--color-text-secondary);
   font-weight: normal;
 }
 
 .calc-table .total-row {
-  background: #f0f9ff;
-  font-weight: bold;
+  background: var(--hr-primary-bg);
+  font-weight: 700;
 }
 
 .calc-detail ul {
@@ -947,7 +950,7 @@ h4 {
 }
 
 .calc-table tr.highlight {
-  background: #fef0f0;
-  border-left: 4px solid #F56C6C;
+  background: var(--hr-danger-bg);
+  border-left: 3px solid var(--hr-danger);
 }
 </style>

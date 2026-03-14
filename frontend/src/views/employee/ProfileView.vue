@@ -594,7 +594,7 @@ onMounted(() => {
 
 <style scoped>
 .profile {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .card-header {
@@ -605,44 +605,53 @@ onMounted(() => {
 
 .profile-header {
   text-align: center;
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 
 .avatar-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .avatar-actions {
-  margin-top: 10px;
+  margin-top: var(--hr-space-sm);
 }
 
 .basic-info h3 {
   margin: 0 0 10px 0;
-  color: #303133;
-  font-size: 24px;
+  color: var(--color-text-primary);
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .job-info {
-  color: #409EFF;
-  font-size: 16px;
+  color: var(--hr-primary);
+  font-size: 15px;
   margin: 0 0 5px 0;
+  font-weight: 500;
 }
 
 .employee-info {
-  color: #909399;
+  color: var(--color-text-secondary);
   font-size: 14px;
   margin: 0;
 }
 
 .stats-info {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
-  padding: 0 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  border-radius: var(--hr-radius-sm);
+  transition: background var(--hr-transition-fast);
+}
+
+.stat-item:hover {
+  background: var(--hr-gray-50);
 }
 
 .stat-item:last-child {
@@ -650,12 +659,13 @@ onMounted(() => {
 }
 
 .stat-item .label {
-  color: #909399;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .stat-item .value {
-  color: #303133;
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .el-form {

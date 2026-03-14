@@ -966,11 +966,11 @@ onActivated(() => {
 
 <style scoped>
 .performance {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .filter-form {
@@ -978,78 +978,88 @@ onActivated(() => {
 }
 
 .latest-performance {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .performance-item {
   text-align: center;
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .performance-item.total .score {
-  color: #409EFF;
-  font-size: 36px;
+  color: var(--hr-primary);
+  font-size: 34px;
 }
 
 .performance-item.work .score {
-  color: #67C23A;
+  color: var(--hr-success);
 }
 
 .performance-item.efficiency .score {
-  color: #E6A23C;
+  color: var(--hr-warning);
 }
 
 .performance-item.teamwork .score {
-  color: #F56C6C;
+  color: var(--hr-danger);
 }
 
 .performance-item .score {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 10px;
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .performance-item .label {
-  color: #909399;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
   margin-bottom: 5px;
 }
 
 .performance-item .grade {
-  font-size: 16px;
-  font-weight: bold;
-  color: #409EFF;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hr-primary);
 }
 
 .chart-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .pagination {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .performance-stats {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  border-radius: var(--hr-radius-sm);
+  transition: background var(--hr-transition-fast);
+}
+
+.stat-item:hover {
+  background: var(--hr-gray-50);
 }
 
 .stat-item .label {
-  color: #909399;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .stat-item .value {
-  color: #303133;
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .performance-detail {
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 </style>

@@ -208,52 +208,31 @@ onMounted(() => {
 
 <style scoped>
 @keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes particle {
-  0% {
-    transform: translateY(100vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100vh) rotate(360deg);
-    opacity: 0;
-  }
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 110, 247, 0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(79, 110, 247, 0); }
 }
 
 .login-container {
@@ -265,11 +244,9 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+  background: linear-gradient(-45deg, #4f6ef7, #7c3aed, #ec4899, #3b82f6);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-  margin: 0;
-  padding: 0;
+  animation: gradientShift 18s ease infinite;
   overflow: hidden;
 }
 
@@ -285,100 +262,108 @@ onMounted(() => {
 .particles::after {
   content: '';
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.3);
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  animation: particle 15s linear infinite;
+  animation: particle 18s linear infinite;
 }
 
 .particles::before {
-  left: 20%;
-  animation-delay: 0s;
-  animation-duration: 20s;
+  left: 15%;
+  width: 6px;
+  height: 6px;
+  animation-duration: 22s;
 }
 
 .particles::after {
-  left: 80%;
-  animation-delay: 5s;
-  animation-duration: 25s;
+  left: 75%;
+  animation-delay: 6s;
+  animation-duration: 28s;
 }
 
 .login-container::before {
   content: '';
   position: absolute;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 70%);
   border-radius: 50%;
-  top: -200px;
-  right: -200px;
-  animation: float 6s ease-in-out infinite;
+  top: -180px;
+  right: -180px;
+  animation: float 7s ease-in-out infinite;
 }
 
 .login-container::after {
   content: '';
   position: absolute;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent);
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 70%);
   border-radius: 50%;
-  bottom: -150px;
-  left: -150px;
-  animation: float 8s ease-in-out infinite reverse;
+  bottom: -120px;
+  left: -120px;
+  animation: float 9s ease-in-out infinite reverse;
 }
 
 .login-box {
   width: 420px;
-  padding: 50px 45px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2);
-  animation: fadeIn 0.8s ease-out;
+  padding: 48px 42px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(24px) saturate(1.2);
+  border-radius: var(--hr-radius-xl);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  animation: fadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   z-index: 1;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .login-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .logo-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  background: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-  animation: float 3s ease-in-out infinite;
+  box-shadow: 0 8px 24px rgba(79, 110, 247, 0.35);
+  animation: pulse 3s ease-in-out infinite;
 }
 
 .login-header h1 {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 8px;
-  font-size: 28px;
-  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 26px;
+  font-weight: 800;
   letter-spacing: -0.5px;
 }
 
 .login-header p {
-  color: #666;
+  color: var(--hr-gray-500);
   font-size: 14px;
   font-weight: 400;
+  letter-spacing: 0.5px;
 }
 
 .login-form {
@@ -386,56 +371,59 @@ onMounted(() => {
 }
 
 .login-form :deep(.el-form-item) {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .login-form :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  padding: 12px 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  border-radius: 10px !important;
+  padding: 10px 15px;
+  box-shadow: 0 0 0 1px var(--hr-gray-200) inset, 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.25s ease !important;
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 0 0 1px var(--hr-gray-300) inset, 0 2px 8px rgba(79, 110, 247, 0.08) !important;
 }
 
 .login-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: 0 0 0 2px rgba(79, 110, 247, 0.2), 0 0 0 1px var(--hr-primary) inset !important;
 }
 
 .login-btn {
   width: 100%;
-  height: 48px;
-  font-size: 16px;
+  height: 46px;
+  font-size: 15px;
   font-weight: 600;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(79, 110, 247, 0.35);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  letter-spacing: 1px;
 }
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 20px rgba(79, 110, 247, 0.45) !important;
+  background: linear-gradient(135deg, #6382f9 0%, #8b5cf6 100%) !important;
 }
 
 .login-btn:active {
   transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(79, 110, 247, 0.3) !important;
 }
 
 .login-footer {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #e8e8e8;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hr-gray-100);
   text-align: center;
 }
 
 .login-footer p {
-  color: #999;
+  color: var(--hr-gray-400);
   font-size: 12px;
-  margin: 8px 0;
+  margin: 6px 0;
   line-height: 1.6;
 }
 
@@ -444,12 +432,12 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: #666;
+  color: var(--hr-gray-500);
   font-size: 12px;
 }
 
 .login-footer .tips .el-icon {
-  color: #409eff;
+  color: var(--hr-primary);
   font-size: 14px;
 }
 </style>

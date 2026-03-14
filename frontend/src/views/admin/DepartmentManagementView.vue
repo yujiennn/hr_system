@@ -696,11 +696,11 @@ onMounted(async () => {
 
 <style scoped>
 .department-management {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .page-header {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .header-content {
@@ -711,21 +711,22 @@ onMounted(async () => {
 
 .header-content h2 {
   margin: 0;
-  font-size: 24px;
-  color: #303133;
+  font-size: 22px;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 .search-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .table-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .department-name {
@@ -735,14 +736,15 @@ onMounted(async () => {
 }
 
 .dept-icon {
-  color: #409eff;
+  color: var(--hr-primary);
 }
 
 :deep(.el-table .el-table__row) {
   cursor: pointer;
+  transition: all var(--hr-transition-fast);
 }
 
 :deep(.el-table .el-table__row:hover) {
-  background-color: #f5f7fa;
+  background-color: var(--hr-gray-50);
 }
 </style>

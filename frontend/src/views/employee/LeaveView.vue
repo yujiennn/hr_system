@@ -479,7 +479,7 @@ onMounted(() => {
 
 <style scoped>
 .leave {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .card-header {
@@ -489,30 +489,39 @@ onMounted(() => {
 }
 
 .leave-quota {
-  padding: 10px 0;
+  padding: var(--hr-space-sm) 0;
 }
 
 .quota-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: var(--hr-radius-sm);
+  transition: background var(--hr-transition-fast);
+}
+
+.quota-item:hover {
+  background: var(--hr-gray-50);
 }
 
 .quota-item .label {
-  color: #909399;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .quota-item .value {
-  color: #303133;
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .pagination {
-  margin-top: 20px;
+  margin-top: var(--hr-space-lg);
   text-align: right;
 }
 
 .leave-detail {
-  padding: 20px 0;
+  padding: var(--hr-space-lg) 0;
 }
 </style>

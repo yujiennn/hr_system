@@ -19,17 +19,17 @@ import FaceRegistration from '@/components/FaceRegistration.vue'
 <style scoped>
 .face-registration-page {
   height: 100vh;
-  background: #f5f7fa;
+  background: var(--color-background-page);
 }
 
 .page-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 
 .page-content {
-  padding: 20px;
+  padding: var(--hr-space-lg);
   max-width: 1200px;
   margin: 0 auto;
 }

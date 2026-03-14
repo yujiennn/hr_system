@@ -368,36 +368,49 @@ onMounted(async () => {
 }
 
 .dashboard-header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .welcome-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%);
   color: white;
+  border: none !important;
 }
 
 .welcome-card :deep(.el-card__body) {
-  padding: 30px;
+  padding: 32px 36px;
+}
+
+.welcome-card :deep(.el-card__header) {
+  display: none;
 }
 
 .welcome-content h2 {
-  margin: 0 0 10px 0;
-  font-size: 28px;
-  font-weight: 600;
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .welcome-text {
   margin: 0;
-  font-size: 16px;
-  opacity: 0.9;
+  font-size: 15px;
+  opacity: 0.85;
 }
 
 .dashboard-stats {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
-  height: 120px;
+  height: 110px;
+  border: none !important;
+  transition: transform var(--hr-transition-slow), box-shadow var(--hr-transition-slow) !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--hr-shadow-card-hover) !important;
 }
 
 .stat-content {
@@ -407,59 +420,62 @@ onMounted(async () => {
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--hr-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
-  font-size: 24px;
+  margin-right: 16px;
+  font-size: 22px;
   color: white;
 }
 
 .stat-icon.attendance {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f6ef7 0%, #6366f1 100%);
 }
 
 .stat-icon.leave {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
 }
 
 .stat-icon.salary {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
 }
 
 .stat-icon.performance {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
 }
 
 .stat-text h3 {
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
   font-size: 24px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 700;
+  color: var(--hr-gray-800);
 }
 
 .stat-text p {
   margin: 0;
-  font-size: 14px;
-  color: #909399;
+  font-size: 13px;
+  color: var(--hr-gray-500);
 }
 
 .dashboard-content {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
+  color: var(--hr-gray-800);
 }
 
 .clock-buttons {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .attendance-info {
@@ -467,22 +483,27 @@ onMounted(async () => {
 }
 
 .attendance-item {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
 }
 
 .attendance-item .label {
-  color: #909399;
-  margin-right: 10px;
+  color: var(--hr-gray-500);
+  margin-right: 8px;
+  font-size: 14px;
 }
 
 .attendance-item .value {
-  color: #303133;
-  font-weight: 500;
+  color: var(--hr-gray-800);
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .attendance-item .tip {
-  color: #909399;
+  color: var(--hr-gray-400);
   font-style: italic;
+  font-size: 14px;
 }
 
 .leave-list {
@@ -493,12 +514,20 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hr-gray-100);
+  transition: background var(--hr-transition-fast);
 }
 
 .leave-item:last-child {
   border-bottom: none;
+}
+
+.leave-item:hover {
+  background: var(--hr-gray-50);
+  margin: 0 -12px;
+  padding: 12px;
+  border-radius: var(--hr-radius-sm);
 }
 
 .leave-info {
@@ -507,19 +536,22 @@ onMounted(async () => {
 }
 
 .leave-type {
-  font-weight: 500;
-  margin-bottom: 5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--hr-gray-800);
+  font-size: 14px;
 }
 
 .leave-date {
   font-size: 12px;
-  color: #909399;
+  color: var(--hr-gray-400);
 }
 
 .no-data {
   text-align: center;
-  color: #909399;
+  color: var(--hr-gray-400);
   padding: 40px 0;
+  font-size: 14px;
 }
 
 .quick-actions {
@@ -527,6 +559,6 @@ onMounted(async () => {
 }
 
 .quick-actions .el-button {
-  margin: 0 10px 10px 0;
+  margin: 0 8px 8px 0;
 }
 </style>

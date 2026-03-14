@@ -1437,11 +1437,11 @@ onMounted(() => {
 
 <style scoped>
 .system-config {
-  padding: 20px;
+  padding: var(--hr-space-lg);
 }
 
 .page-header {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
 }
 
 .header-content {
@@ -1452,40 +1452,42 @@ onMounted(() => {
 
 .header-content h2 {
   margin: 0;
-  font-size: 24px;
-  color: #303133;
+  font-size: 22px;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 .config-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--hr-space-lg);
   height: fit-content;
 }
 
 .logo-upload {
   width: 120px;
   height: 120px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
+  border: 1px dashed var(--hr-gray-300);
+  border-radius: var(--hr-radius-md);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: border-color var(--hr-transition-fast);
 }
 
 .logo-upload:hover {
-  border-color: #409eff;
+  border-color: var(--hr-primary);
 }
 
 .logo-upload-icon {
   font-size: 28px;
-  color: #8c939d;
+  color: var(--color-text-placeholder);
 }
 
 .logo-preview {
@@ -1495,9 +1497,9 @@ onMounted(() => {
 }
 
 :deep(.el-card__header) {
-  background-color: #f8f9fa;
+  background-color: var(--hr-gray-50);
   font-weight: 600;
-  color: #303133;
+  color: var(--color-text-primary);
 }
 
 :deep(.el-form-item__label) {
@@ -1524,18 +1526,18 @@ onMounted(() => {
   margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 .tip-text {
-  color: #909399;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--hr-space-sm);
 }
 
 .coordinate-info {

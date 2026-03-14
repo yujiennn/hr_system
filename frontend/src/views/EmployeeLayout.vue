@@ -127,13 +127,14 @@ const handleCommand = async (command: string) => {
 }
 
 .header {
-  background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   color: white;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.25);
+  height: 56px;
 }
 
 .header-content {
@@ -145,31 +146,30 @@ const handleCommand = async (command: string) => {
 
 .header-content h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.3px;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s;
-  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.25s ease;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .user-info:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
 }
 
 .avatar {
   width: 32px;
   height: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .username {
@@ -178,38 +178,45 @@ const handleCommand = async (command: string) => {
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #f5f7fa 0%, #e8eaed 100%);
-  border-right: 1px solid #d9dce0;
+  background: #fff;
+  border-right: 1px solid var(--hr-gray-100);
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.03);
 }
 
 .sidebar-menu {
   border: none;
   height: 100%;
   background: transparent;
+  padding: 8px 0;
 }
 
 .sidebar-menu :deep(.el-menu-item) {
-  margin: 4px 8px;
+  margin: 2px 8px;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   font-weight: 500;
+  height: 44px;
+  line-height: 44px;
+  font-size: 14px;
+  color: var(--hr-gray-600);
 }
 
 .sidebar-menu :deep(.el-menu-item:hover) {
-  background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
-  color: #fff;
+  background: #fff7ed;
+  color: #ea580c;
   transform: translateX(4px);
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active) {
-  background: linear-gradient(135deg, #fa8c16 0%, #ff7a45 100%);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(250, 140, 22, 0.4);
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.3);
+  font-weight: 600;
 }
 
 .main-content {
-  background: #f5f7fa;
-  padding: 20px;
+  background: var(--color-background-page);
+  padding: 24px;
   flex: 1;
   overflow-y: auto;
   min-height: 0;

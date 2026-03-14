@@ -14,7 +14,7 @@ export interface UserInfo {
   employee_id: string
   phone: string
   user_type: 'employee' | 'manager' | 'admin'
-  department: number
+  department: number | { id: number; name: string } | null
   department_name: string
   avatar?: string
   position: string
