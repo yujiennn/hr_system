@@ -1,0 +1,47 @@
+@startuml leave_flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 11
+
+title 请假审批业务流程图
+
+|员工|
+start
+:选择请假类型;
+:填写起止日期和原因;
+:系统自动计算请假天数;
+
+if (假期余额是否充足?) then (不足)
+    :提示余额不足;
+    stop
+else (充足)
+endif
+
+:提交请假申请\nPOST /api/leave/applications/;
+:申请状态 = pending;
+
+|部门经理|
+:查看待审批列表;
+:审核请假申请;
+
+if (审批结果?) then (拒绝)
+    :填写拒绝理由;
+    :状态 = rejected;
+    |员工|
+    :收到拒绝通知;
+    stop
+else (批准)
+    :状态 = approved;
+endif
+
+|系统|
+:自动扣减假期余额\n(LeaveBalance);
+:更新请假记录;
+
+|员工|
+:收到审批通过通知;
+:查看更新后的假期余额;
+stop
+
+@enduml

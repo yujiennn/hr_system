@@ -1,0 +1,142 @@
+@startuml thesis_core_er
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "SimSun"
+skinparam defaultFontSize 12
+skinparam linetype ortho
+skinparam backgroundColor white
+skinparam ArrowThickness 1
+skinparam RectangleBorderThickness 1
+skinparam EntityBorderThickness 1
+skinparam nodesep 70
+skinparam ranksep 80
+
+hide circle
+top to bottom direction
+
+title 图3-X 系统核心E-R图（论文精简版）
+
+entity "部门\nDepartment" as Department {
+  * id : PK
+  --
+  name : VARCHAR(100)
+  description : TEXT
+  parent_id : FK
+  created_at : DATETIME
+}
+
+entity "员工\nUser" as User {
+  * id : PK
+  --
+  employee_id : VARCHAR(20)
+  username : VARCHAR(150)
+  user_type : ENUM
+  department_id : FK
+  phone : VARCHAR(11)
+  hire_date : DATE
+}
+
+entity "考勤记录\nAttendanceRecord" as AttendanceRecord {
+  * id : PK
+  --
+  user_id : FK
+  clock_time : DATETIME
+  clock_type : ENUM(in/out)
+  status : ENUM
+  latitude : FLOAT
+  longitude : FLOAT
+}
+
+entity "请假类型\nLeaveType" as LeaveType {
+  * id : PK
+  --
+  name : VARCHAR(50)
+  max_days_per_year : INT
+  is_paid : BOOLEAN
+  is_active : BOOLEAN
+}
+
+entity "请假申请\nLeaveApplication" as LeaveApplication {
+  * id : PK
+  --
+  user_id : FK
+  leave_type_id : FK
+  approver_id : FK
+  start_date : DATE
+  end_date : DATE
+  days : FLOAT
+  status : ENUM
+}
+
+entity "绩效目标\nPerformanceGoal" as PerformanceGoal {
+  * id : PK
+  --
+  user_id : FK
+  period_id : FK
+  template_id : FK
+  approver_id : FK
+  status : ENUM
+  created_at : DATETIME
+}
+
+entity "绩效评估\nPerformanceEvaluation" as PerformanceEvaluation {
+  * id : PK
+  --
+  goal_id : FK(Unique)
+  evaluator_id : FK
+  self_evaluation_score : FLOAT
+  manager_evaluation_score : FLOAT
+  final_score : FLOAT
+  status : ENUM
+}
+
+entity "工资记录\nSalaryRecord" as SalaryRecord {
+  * id : PK
+  --
+  user_id : FK
+  performance_evaluation_id : FK
+  manager_id : FK
+  finance_approver_id : FK
+  year : INT
+  month : INT
+  basic_salary : DECIMAL
+  gross_salary : DECIMAL
+  net_salary : DECIMAL
+  status : ENUM
+}
+
+' 隐式约束线（仅用于布局，不显示）
+Department -[hidden]- User
+AttendanceRecord -[hidden]- LeaveType
+LeaveType -[hidden]- LeaveApplication
+LeaveApplication -[hidden]- PerformanceGoal
+PerformanceEvaluation -[hidden]- SalaryRecord
+User -[hidden]- LeaveApplication
+LeaveApplication -[hidden]- PerformanceEvaluation
+
+' 组织关系
+Department ||--o{ Department : 上下级
+Department ||--o{ User : 归属
+
+' 人事主流程
+User ||--o{ AttendanceRecord : 打卡
+User ||--o{ LeaveApplication : 申请/审批
+LeaveType ||--o{ LeaveApplication : 类型
+
+' 绩效主流程
+User ||--o{ PerformanceGoal : 制定/审批
+PerformanceGoal ||--|| PerformanceEvaluation : 评估
+User ||--o{ PerformanceEvaluation : 评估人
+
+' 薪资主流程
+User ||--o{ SalaryRecord : 员工/经理/财务
+PerformanceEvaluation ||--o{ SalaryRecord : 绩效关联
+
+legend right
+  说明：
+  1. 本图仅保留论文展示所需核心实体、关键属性与主干关系。
+  2. 同一实体对的多角色外键（如发起/审批）合并为一条语义关系线。
+  3. “||--||”表示一对一，“||--o{”表示一对多。
+endlegend
+
+@enduml

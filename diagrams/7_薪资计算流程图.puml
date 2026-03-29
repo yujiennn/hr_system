@@ -1,0 +1,53 @@
+@startuml salary_flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 11
+
+title 薪资计算业务流程图
+
+|管理员|
+start
+:发起月度薪资计算;
+:选择计算年月;
+
+|薪资计算引擎|
+:加载薪资配置\n(SalaryConfig);
+:获取所有员工列表;
+
+repeat
+    :获取员工基本工资;
+
+    :== 收入项计算 ==;
+    :计算绩效奖金\n= 基本工资 × 20% × 绩效系数;
+
+    if (当月是否全勤?) then (是)
+        :加全勤奖;
+    else (否)
+        :全勤奖 = 0;
+    endif
+
+    :计算加班费\n= 加班时薪 × 小时数 × 系数;
+
+    :== 扣除项计算 ==;
+    :计算请假扣款\n= 日薪 × 天数 × 扣款比例;
+    :计算迟到扣款\n轻微20元/次，严重50元/次;
+    :计算缺勤扣款\n= 日薪 × 缺勤天数;
+    :计算社保\n= 基本工资 × 8%;
+    :计算个人所得税\n(累进税率);
+
+    :== 汇总计算 ==;
+    :应发工资 = ∑收入项;
+    :实发工资 = 应发工资 - ∑扣除项;
+    :保存薪资记录\n(SalaryRecord);
+
+repeat while (还有员工?) is (是)
+->否;
+
+|管理员|
+:查看薪资计算结果;
+:审核确认;
+:员工可查看/导出工资单;
+stop
+
+@enduml

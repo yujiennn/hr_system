@@ -1,0 +1,96 @@
+@startuml use_case
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 11
+skinparam actorBorderColor #333333
+skinparam usecaseBorderColor #888888
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam packageBorderColor #666666
+
+title HR智慧员工运营系统 - 用例图
+
+left to right direction
+
+actor "普通员工" as emp #BBDEFB
+actor "部门经理" as mgr #C8E6C9
+actor "系统管理员" as admin #FFCDD2
+
+rectangle "HR智慧员工运营系统" {
+
+    package "用户管理" {
+        usecase "登录/注销" as UC01
+        usecase "修改个人信息" as UC02
+        usecase "人脸注册" as UC03
+        usecase "管理所有用户" as UC17
+    }
+
+    package "考勤管理" {
+        usecase "人脸识别打卡" as UC04
+        usecase "查看打卡记录" as UC05
+        usecase "提交考勤异常" as UC06
+        usecase "查看部门考勤" as UC11
+        usecase "审批考勤异常" as UC16
+    }
+
+    package "请假管理" {
+        usecase "提交请假申请" as UC07
+        usecase "查看请假状态" as UC08
+        usecase "审批请假申请" as UC12
+    }
+
+    package "薪资管理" {
+        usecase "查看个人薪资" as UC09
+        usecase "下载工资单" as UC10
+        usecase "查看部门薪资" as UC13
+        usecase "管理部门薪资" as UC14
+        usecase "配置薪资参数" as UC22
+    }
+
+    package "绩效管理" {
+        usecase "查看绩效评估" as UC15
+        usecase "执行绩效评估" as UC18
+        usecase "管理绩效周期" as UC23
+    }
+
+    package "系统管理" {
+        usecase "管理部门组织" as UC19
+        usecase "配置公司位置" as UC20
+        usecase "查看全局报表" as UC21
+        usecase "配置系统参数" as UC24
+    }
+}
+
+' 普通员工
+emp --> UC01
+emp --> UC02
+emp --> UC03
+emp --> UC04
+emp --> UC05
+emp --> UC06
+emp --> UC07
+emp --> UC08
+emp --> UC09
+emp --> UC10
+emp --> UC15
+
+' 部门经理 (继承员工)
+emp <|-- mgr
+mgr --> UC11
+mgr --> UC12
+mgr --> UC13
+mgr --> UC14
+mgr --> UC16
+mgr --> UC18
+
+' 系统管理员
+admin --> UC01
+admin --> UC17
+admin --> UC19
+admin --> UC20
+admin --> UC21
+admin --> UC22
+admin --> UC23
+admin --> UC24
+
+@enduml

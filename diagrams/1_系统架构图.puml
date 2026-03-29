@@ -1,0 +1,62 @@
+@startuml system_architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+skinparam packageBorderColor #555555
+skinparam packageBackgroundColor #FFFFFF
+skinparam componentBorderColor #888888
+skinparam arrowColor #555555
+skinparam noteBorderColor #AAAAAA
+
+title HR智慧员工运营系统 - 系统架构图
+
+package "客户端" as client #F3E5F5 {
+    [Web浏览器\n(Chrome / Edge / Firefox)] as browser
+}
+
+package "表现层 (Presentation Layer)" as presentation #E3F2FD {
+    [Vue 3.5.13 + TypeScript 5.8.0] as vue
+    [Element Plus 2.9.11\nUI组件库] as elementplus
+    [Pinia 3.0.1\n状态管理] as pinia
+    [Axios 1.9.0\nHTTP客户端] as axios
+    [ECharts 5.6.0\n数据可视化] as echarts
+    [Face-api.js\n前端人脸检测] as faceapi
+    [Vue Router\n路由管理] as router
+    [Vite 6.3.5\n构建工具] as vite
+}
+
+package "业务逻辑层 (Business Logic Layer)" as business #E8F5E9 {
+    [Django 5.1.5\nWeb框架] as django
+    [Django REST Framework 3.15.2\nRESTful API] as drf
+    [Simple JWT 5.3.0\nJWT认证授权] as jwt
+    [django-cors-headers 4.3.1\n跨域处理] as cors
+    [Pillow 10.2.0\n图像处理] as pillow
+    [openpyxl 3.1.2\nExcel导出] as openpyxl
+}
+
+package "数据访问层 (Data Access Layer)" as data #FFF3E0 {
+    [Django ORM\n对象关系映射] as orm
+    database "MySQL 8.0\n关系型数据库" as mysql
+    storage "Media Storage\n文件存储\n(头像/人脸图片)" as media
+}
+
+browser -down-> vue : HTTP/HTTPS
+vue -down-> axios
+vue --> elementplus
+vue --> pinia
+vue --> echarts
+vue --> faceapi
+vue --> router
+axios -down-> drf : "JSON + JWT Token\n/api/*"
+drf --> django
+django --> jwt
+django --> cors
+django --> pillow
+django --> openpyxl
+django -down-> orm
+orm -down-> mysql
+django -down-> media
+
+@enduml

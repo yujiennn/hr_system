@@ -1,0 +1,95 @@
+@startuml overall_function_framework
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 10
+skinparam classBorderColor #000000
+skinparam classBackgroundColor #FFFFFF
+skinparam rectangleBorderColor #000000
+skinparam rectangleBackgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ranksep 30
+skinparam nodesep 10
+
+title HR智慧员工运营系统 - 功能模块整体框架图
+
+top to bottom direction
+
+' ===== 顶部系统 =====
+rectangle "HR智慧员工运营系统" as SYS #F0F0F0
+
+' ===== 员工端 =====
+rectangle "员工" as emp_title #FFFFFF
+
+rectangle "个人\n信息\n管理" as emp_f1 #F5F5F5
+rectangle "人脸\n注册\n识别" as emp_f2 #F5F5F5
+rectangle "考勤\n打卡\n记录" as emp_f3 #F5F5F5
+rectangle "考勤\n异常\n申请" as emp_f4 #F5F5F5
+rectangle "请假\n申请\n查询" as emp_f5 #F5F5F5
+rectangle "薪资\n查询\n导出" as emp_f6 #F5F5F5
+rectangle "绩效\n评估\n结果" as emp_f7 #F5F5F5
+rectangle "工作\n时间\n表" as emp_f8 #F5F5F5
+
+' ===== 经理端 =====
+rectangle "经理" as mgr_title #FFFFFF
+
+rectangle "个人\n信息\n管理" as mgr_f1 #F5F5F5
+rectangle "团队\n考勤\n查看" as mgr_f2 #F5F5F5
+rectangle "考勤\n异常\n审批" as mgr_f3 #F5F5F5
+rectangle "请假\n审批\n管理" as mgr_f4 #F5F5F5
+rectangle "请假\n统计\n分析" as mgr_f5 #F5F5F5
+rectangle "部门\n薪资\n查看" as mgr_f6 #F5F5F5
+rectangle "部门\n薪资\n维护" as mgr_f7 #F5F5F5
+rectangle "绩效\n评估\n执行" as mgr_f8 #F5F5F5
+rectangle "绩效\n结果\n审核" as mgr_f9 #F5F5F5
+
+' ===== 管理员端 =====
+rectangle "管理员" as adm_title #FFFFFF
+
+rectangle "用户\n注册\n登录" as adm_f1 #F5F5F5
+rectangle "用户\n信息\n管理" as adm_f2 #F5F5F5
+rectangle "角色\n权限\n配置" as adm_f3 #F5F5F5
+rectangle "组织\n部门\n管理" as adm_f4 #F5F5F5
+rectangle "公司\n位置\n配置" as adm_f5 #F5F5F5
+rectangle "工作\n时间\n表\n配置" as adm_f6 #F5F5F5
+rectangle "薪资\n参数\n配置" as adm_f7 #F5F5F5
+rectangle "绩效\n周期\n管理" as adm_f8 #F5F5F5
+rectangle "系统\n报表\n统计" as adm_f9 #F5F5F5
+rectangle "数据\n备份\n恢复" as adm_f10 #F5F5F5
+
+' ===== 连接关系 =====
+SYS --> emp_title
+SYS --> mgr_title
+SYS --> adm_title
+
+emp_title --> emp_f1
+emp_f1 --> emp_f2
+emp_f2 --> emp_f3
+emp_f3 --> emp_f4
+emp_f4 --> emp_f5
+emp_f5 --> emp_f6
+emp_f6 --> emp_f7
+emp_f7 --> emp_f8
+
+mgr_title --> mgr_f1
+mgr_f1 --> mgr_f2
+mgr_f2 --> mgr_f3
+mgr_f3 --> mgr_f4
+mgr_f4 --> mgr_f5
+mgr_f5 --> mgr_f6
+mgr_f6 --> mgr_f7
+mgr_f7 --> mgr_f8
+mgr_f8 --> mgr_f9
+
+adm_title --> adm_f1
+adm_f1 --> adm_f2
+adm_f2 --> adm_f3
+adm_f3 --> adm_f4
+adm_f4 --> adm_f5
+adm_f5 --> adm_f6
+adm_f6 --> adm_f7
+adm_f7 --> adm_f8
+adm_f8 --> adm_f9
+adm_f9 --> adm_f10
+
+@enduml

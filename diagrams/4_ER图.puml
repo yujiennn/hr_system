@@ -1,0 +1,274 @@
+@startuml er_diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 10
+skinparam classBorderColor #7A7A7A
+skinparam classBackgroundColor #FFFFFF
+skinparam classHeaderBackgroundColor #EAF2FF
+skinparam arrowColor #4F4F4F
+
+title HR智慧员工运营系统 - 当前模型E-R图（按 models.py）
+
+entity "Department\n(部门)" as Department #C8E6C9 {
+    * id : INT <<PK>>
+    --
+    name : VARCHAR(100)
+    parent_id : INT <<FK,self>>
+}
+
+entity "User\n(用户)" as User #BBDEFB {
+    * id : INT <<PK>>
+    --
+    username : VARCHAR(150) <<UK>>
+    employee_id : VARCHAR(20) <<UK>>
+    department_id : INT <<FK>>
+    user_type : VARCHAR(10)
+}
+
+entity "AttendanceRecord\n(考勤记录)" as AttendanceRecord #FFF9C4 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK>>
+    clock_time : DATETIME
+    clock_type : VARCHAR(3)
+    status : VARCHAR(10)
+}
+
+entity "WorkSchedule\n(工作时间表)" as WorkSchedule #FFF9C4 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK,Nullable>>
+    name : VARCHAR(100)
+    weekday : INT
+}
+
+entity "AttendanceException\n(考勤异常申请)" as AttendanceException #FFF9C4 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK>>
+    approver_id : INT <<FK,Nullable>>
+    exception_type : VARCHAR(10)
+    status : VARCHAR(10)
+}
+
+entity "LeaveType\n(请假类型)" as LeaveType #B2EBF2 {
+    * id : INT <<PK>>
+    --
+    name : VARCHAR(50)
+    max_days_per_year : INT
+}
+
+entity "LeaveApplication\n(请假申请)" as LeaveApplication #B2EBF2 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK>>
+    leave_type_id : INT <<FK>>
+    approver_id : INT <<FK,Nullable>>
+    start_date : DATE
+    end_date : DATE
+    status : VARCHAR(10)
+}
+
+entity "LeaveBalance\n(请假余额)" as LeaveBalance #B2EBF2 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK>>
+    leave_type_id : INT <<FK>>
+    year : INT
+    remaining_days : FLOAT
+}
+
+entity "SalaryConfig\n(薪资配置)" as SalaryConfig #FFE0B2 {
+    * id : INT <<PK>>
+    --
+    name : VARCHAR(100)
+    is_active : BOOLEAN
+}
+
+entity "SalaryStructure\n(薪酬结构)" as SalaryStructure #FFE0B2 {
+    * id : INT <<PK>>
+    --
+    name : VARCHAR(100)
+}
+
+entity "SalaryItem\n(薪酬项目)" as SalaryItem #FFE0B2 {
+    * id : INT <<PK>>
+    --
+    structure_id : INT <<FK>>
+    code : VARCHAR(20)
+    item_type : VARCHAR(10)
+}
+
+entity "SalaryRecord\n(工资记录)" as SalaryRecord #FFE0B2 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK>>
+    performance_evaluation_id : INT <<FK,Nullable>>
+    manager_id : INT <<FK,Nullable>>
+    finance_approver_id : INT <<FK,Nullable>>
+    paid_by_id : INT <<FK,Nullable>>
+    rejected_by_id : INT <<FK,Nullable>>
+    year : INT
+    month : INT
+    status : VARCHAR(20)
+}
+
+entity "PerformancePeriod\n(绩效周期)" as PerformancePeriod #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    name : VARCHAR(100)
+    period_type : VARCHAR(10)
+}
+
+entity "PerformanceTemplate\n(绩效模板)" as PerformanceTemplate #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    name : VARCHAR(100)
+}
+
+entity "PerformanceIndicator\n(绩效指标)" as PerformanceIndicator #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    template_id : INT <<FK>>
+    name : VARCHAR(100)
+}
+
+entity "PerformanceGoal\n(绩效目标)" as PerformanceGoal #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK>>
+    period_id : INT <<FK>>
+    template_id : INT <<FK>>
+    approver_id : INT <<FK,Nullable>>
+    status : VARCHAR(10)
+}
+
+entity "PerformanceGoalDetail\n(绩效目标明细)" as PerformanceGoalDetail #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    goal_id : INT <<FK>>
+    indicator_id : INT <<FK>>
+}
+
+entity "PerformanceEvaluation\n(绩效评估)" as PerformanceEvaluation #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    goal_id : INT <<FK,Unique>>
+    evaluator_id : INT <<FK,Nullable>>
+    final_score : FLOAT
+    status : VARCHAR(20)
+}
+
+entity "PerformanceEvaluationDetail\n(绩效评估明细)" as PerformanceEvaluationDetail #E1BEE7 {
+    * id : INT <<PK>>
+    --
+    evaluation_id : INT <<FK>>
+    indicator_id : INT <<FK>>
+}
+
+entity "ReportCategory\n(报表分类)" as ReportCategory #D9F0FF {
+    * id : INT <<PK>>
+    --
+    code : VARCHAR(50) <<UK>>
+}
+
+entity "ReportTemplate\n(报表模板)" as ReportTemplate #D9F0FF {
+    * id : INT <<PK>>
+    --
+    category_id : INT <<FK>>
+    created_by_id : INT <<FK>>
+    code : VARCHAR(100) <<UK>>
+}
+
+entity "Report\n(报表记录)" as Report #D9F0FF {
+    * id : INT <<PK>>
+    --
+    template_id : INT <<FK>>
+    generated_by_id : INT <<FK>>
+    status : VARCHAR(20)
+}
+
+entity "ReportSchedule\n(定时报表任务)" as ReportSchedule #D9F0FF {
+    * id : INT <<PK>>
+    --
+    template_id : INT <<FK>>
+    created_by_id : INT <<FK>>
+    frequency : VARCHAR(20)
+}
+
+entity "SystemLog\n(系统日志)" as SystemLog #ECEFF1 {
+    * id : INT <<PK>>
+    --
+    user_id : INT <<FK,Nullable>>
+    level : VARCHAR(20)
+    module : VARCHAR(50)
+}
+
+entity "CompanyLocation\n(公司位置)" as CompanyLocation #CFD8DC {
+    * id : INT <<PK>>
+    --
+    created_by_id : INT <<FK,Nullable>>
+    name : VARCHAR(100)
+}
+
+entity "SystemConfig\n(系统配置)" as SystemConfig #CFD8DC {
+    * id : INT <<PK>>
+    --
+    created_by_id : INT <<FK,Nullable>>
+    key : VARCHAR(100) <<UK>>
+}
+
+' 用户与组织
+Department ||--o{ Department : "上级/子级"
+Department ||--o{ User : "部门成员"
+
+' 考勤
+User ||--o{ AttendanceRecord : "打卡"
+User ||--o{ WorkSchedule : "班次"
+User ||--o{ AttendanceException : "发起异常申请"
+User ||--o{ AttendanceException : "审批异常申请"
+
+' 请假
+User ||--o{ LeaveApplication : "发起请假"
+LeaveType ||--o{ LeaveApplication : "请假类型"
+User ||--o{ LeaveApplication : "审批请假"
+User ||--o{ LeaveBalance : "请假余额"
+LeaveType ||--o{ LeaveBalance : "余额类型"
+
+' 薪资
+SalaryStructure ||--o{ SalaryItem : "包含项目"
+User ||--o{ SalaryRecord : "员工工资记录"
+PerformanceEvaluation ||--o{ SalaryRecord : "绩效关联"
+User ||--o{ SalaryRecord : "经理审核"
+User ||--o{ SalaryRecord : "财务批准"
+User ||--o{ SalaryRecord : "工资发放"
+User ||--o{ SalaryRecord : "工资拒绝"
+
+' 绩效
+PerformanceTemplate ||--o{ PerformanceIndicator : "定义指标"
+User ||--o{ PerformanceGoal : "制定目标"
+PerformancePeriod ||--o{ PerformanceGoal : "目标所属周期"
+PerformanceTemplate ||--o{ PerformanceGoal : "目标使用模板"
+User ||--o{ PerformanceGoal : "审批目标"
+PerformanceGoal ||--o{ PerformanceGoalDetail : "目标明细"
+PerformanceIndicator ||--o{ PerformanceGoalDetail : "指标被引用"
+PerformanceGoal ||--|| PerformanceEvaluation : "一对一评估"
+User ||--o{ PerformanceEvaluation : "评估人"
+PerformanceEvaluation ||--o{ PerformanceEvaluationDetail : "评估明细"
+PerformanceIndicator ||--o{ PerformanceEvaluationDetail : "明细指标"
+
+' 报表
+ReportCategory ||--o{ ReportTemplate : "分类下模板"
+User ||--o{ ReportTemplate : "创建模板"
+ReportTemplate ||--o{ Report : "生成报表"
+User ||--o{ Report : "生成人"
+ReportTemplate ||--o{ ReportSchedule : "调度任务"
+User ||--o{ ReportSchedule : "创建调度"
+
+' 系统配置与日志
+User ||--o{ SystemLog : "操作日志"
+User ||--o{ CompanyLocation : "创建位置"
+User ||--o{ SystemConfig : "创建配置"
+
+@enduml

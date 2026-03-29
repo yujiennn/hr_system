@@ -37,7 +37,38 @@
               媒体流状态: {{ mediaStream ? '已获取' : '未获取' }}
               <br>
               视频元素状态: {{ videoRef ? '已挂载' : '未挂载' }}
+              <br>
+              安全上下文: {{ envDiagnostics.isSecureContext ? '是' : '否' }}
+              <br>
+              mediaDevices: {{ envDiagnostics.hasMediaDevices ? '可用' : '不可用' }}
+              <br>
+              页面容器: {{ envDiagnostics.inIframe ? 'iframe/嵌入容器' : '浏览器顶层页面' }}
             </div>
+
+            <div v-if="videoDevices.length" style="margin-bottom: 10px; display: flex; gap: 8px; justify-content: center; align-items: center;">
+              <el-select
+                v-model="selectedDeviceId"
+                placeholder="选择摄像头设备"
+                style="width: 300px;"
+              >
+                <el-option
+                  v-for="device in videoDevices"
+                  :key="device.deviceId"
+                  :label="device.label || `摄像头 ${device.deviceId.slice(0, 6)}`"
+                  :value="device.deviceId"
+                />
+              </el-select>
+              <el-button size="default" @click="refreshVideoDevices">刷新设备</el-button>
+            </div>
+
+            <el-alert
+              v-if="!envDiagnostics.hasMediaDevices"
+              type="warning"
+              :closable="false"
+              title="当前运行环境未提供 mediaDevices 接口"
+              description="请使用 Chrome/Edge 直接打开 localhost 页面（不要在内嵌预览容器中打开），或使用下方“上传照片录入”。"
+              style="margin-bottom: 10px;"
+            />
             
             <el-button
               v-if="!cameraStarted"
@@ -49,6 +80,23 @@
               <el-icon><VideoPlay /></el-icon>
               启动摄像头
             </el-button>
+
+            <div v-if="!cameraStarted" style="margin-top: 10px;">
+              <el-button
+                type="default"
+                size="large"
+                @click="triggerFileUpload"
+              >
+                上传照片录入（无摄像头）
+              </el-button>
+              <input
+                ref="fileInputRef"
+                type="file"
+                accept="image/*"
+                style="display: none"
+                @change="handleFileUpload"
+              />
+            </div>
             
             <div v-else class="control-buttons">
               <el-button
@@ -186,31 +234,184 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Camera, VideoPlay, VideoPause, Check, RefreshLeft } from '@element-plus/icons-vue'
 import { userService, type FaceStatusResponse } from '@/services/user'
 
+type LegacyNavigator = Navigator & {
+  webkitGetUserMedia?: (
+    constraints: MediaStreamConstraints,
+    successCallback: (stream: MediaStream) => void,
+    errorCallback: (error: Error) => void
+  ) => void
+  mozGetUserMedia?: (
+    constraints: MediaStreamConstraints,
+    successCallback: (stream: MediaStream) => void,
+    errorCallback: (error: Error) => void
+  ) => void
+  msGetUserMedia?: (
+    constraints: MediaStreamConstraints,
+    successCallback: (stream: MediaStream) => void,
+    errorCallback: (error: Error) => void
+  ) => void
+}
+
 // 响应式变量
 const videoRef = ref<HTMLVideoElement>()
 const canvasRef = ref<HTMLCanvasElement>()
+const fileInputRef = ref<HTMLInputElement>()
 const cameraStarted = ref(false)
 const startingCamera = ref(false)
 const capturedImage = ref('')
 const submitting = ref(false)
 const mediaStream = ref<MediaStream | null>(null)
+const videoDevices = ref<MediaDeviceInfo[]>([])
+const selectedDeviceId = ref('')
+const envDiagnostics = ref({
+  isSecureContext: false,
+  hasMediaDevices: false,
+  inIframe: false
+})
 
 // 人脸状态
 const faceStatus = ref<FaceStatusResponse | null>(null)
 
+const cameraConstraints: MediaStreamConstraints = {
+  video: {
+    width: { ideal: 640 },
+    height: { ideal: 480 },
+    facingMode: 'user'
+  }
+}
+
+const cameraFallbackConstraints: MediaStreamConstraints[] = [
+  cameraConstraints,
+  { video: { facingMode: 'user' } },
+  { video: true }
+]
+
+const listVideoInputDevices = async (): Promise<MediaDeviceInfo[]> => {
+  if (!navigator.mediaDevices?.enumerateDevices) {
+    return []
+  }
+  const devices = await navigator.mediaDevices.enumerateDevices()
+  return devices.filter(device => device.kind === 'videoinput')
+}
+
+const refreshVideoDevices = async () => {
+  const devices = await listVideoInputDevices()
+  videoDevices.value = devices
+  if (!selectedDeviceId.value && devices.length > 0) {
+    selectedDeviceId.value = devices[0].deviceId
+  }
+}
+
+const getLegacyUserMedia = async (): Promise<MediaStream> => {
+
+  const legacyNavigator = navigator as LegacyNavigator
+  const legacyGetUserMedia =
+    legacyNavigator.webkitGetUserMedia ||
+    legacyNavigator.mozGetUserMedia ||
+    legacyNavigator.msGetUserMedia
+
+  if (legacyGetUserMedia) {
+    return new Promise<MediaStream>((resolve, reject) => {
+      legacyGetUserMedia.call(legacyNavigator, cameraConstraints, resolve, reject)
+    })
+  }
+
+  throw new Error('MEDIA_DEVICES_NOT_SUPPORTED')
+}
+
+const refreshEnvDiagnostics = () => {
+  envDiagnostics.value = {
+    isSecureContext: window.isSecureContext,
+    hasMediaDevices: !!navigator.mediaDevices?.getUserMedia,
+    inIframe: window.self !== window.top
+  }
+}
+
+const requestCameraStream = async (
+  modernGetUserMedia: ((constraints: MediaStreamConstraints) => Promise<MediaStream>) | null
+): Promise<MediaStream> => {
+  if (modernGetUserMedia) {
+    let lastError: unknown = null
+
+    // 优先尝试用户选择的设备
+    if (selectedDeviceId.value) {
+      try {
+        return await modernGetUserMedia({
+          video: {
+            deviceId: { exact: selectedDeviceId.value },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        })
+      } catch (error) {
+        lastError = error
+      }
+    }
+
+    // 先尝试按设备ID逐个打开，规避默认设备不可读导致的 NotReadableError
+    const devices = await listVideoInputDevices()
+    for (const device of devices) {
+      if (selectedDeviceId.value && device.deviceId === selectedDeviceId.value) {
+        continue
+      }
+      try {
+        return await modernGetUserMedia({
+          video: {
+            deviceId: { exact: device.deviceId },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        })
+      } catch (error) {
+        lastError = error
+      }
+    }
+
+    for (const constraints of cameraFallbackConstraints) {
+      try {
+        return await modernGetUserMedia(constraints)
+      } catch (error) {
+        lastError = error
+      }
+    }
+    throw lastError ?? new Error('获取摄像头失败')
+  }
+
+  return getLegacyUserMedia()
+}
+
 // 启动摄像头
 const startCamera = async () => {
+  if (startingCamera.value) {
+    return
+  }
+
   try {
     console.log('开始启动摄像头...')
     startingCamera.value = true
-    
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        width: { ideal: 640 },
-        height: { ideal: 480 },
-        facingMode: 'user'
-      }
-    })
+    refreshEnvDiagnostics()
+
+    // 重启摄像头前先释放旧流，避免设备占用导致 NotReadableError
+    if (mediaStream.value) {
+      mediaStream.value.getTracks().forEach(track => track.stop())
+      mediaStream.value = null
+      await new Promise(resolve => setTimeout(resolve, 120))
+    }
+
+    const localHosts = ['localhost', '127.0.0.1', '::1', '0.0.0.0']
+    const isLocalHost = localHosts.includes(window.location.hostname)
+
+    // 仅做提示，不在此处硬拦截；让浏览器返回真实错误原因
+    if (!window.isSecureContext && !isLocalHost) {
+      ElMessage.warning('当前页面可能不是安全上下文，浏览器可能拒绝摄像头访问')
+    }
+
+    const modernGetUserMedia =
+      navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function'
+        ? navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices)
+        : null
+
+    const stream = await requestCameraStream(modernGetUserMedia)
     
     console.log('获取媒体流成功:', stream)
     mediaStream.value = stream
@@ -257,7 +458,21 @@ const startCamera = async () => {
     
   } catch (error) {
     console.error('启动摄像头失败:', error)
-    ElMessage.error('启动摄像头失败，请检查摄像头权限')
+
+    const err = error as Error & { name?: string }
+    if (err.message === 'MEDIA_DEVICES_NOT_SUPPORTED') {
+      ElMessage.error('当前运行环境不支持摄像头接口，请在Chrome/Edge中通过localhost访问，或使用“上传照片录入”')
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError' || err.name === 'AbortError') {
+      ElMessage.error('摄像头被其他应用占用或启动失败，请关闭会议/录屏软件后重试')
+    } else if (err.name === 'SecurityError') {
+      ElMessage.error('浏览器因安全策略拒绝摄像头，请使用 HTTPS 或 localhost 访问')
+    } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      ElMessage.error('摄像头权限被拒绝，请在浏览器地址栏中允许摄像头访问')
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      ElMessage.error('未检测到可用摄像头设备，请检查硬件连接')
+    } else {
+      ElMessage.error('启动摄像头失败，请检查浏览器权限与运行环境')
+    }
     
     // 清理资源
     if (mediaStream.value) {
@@ -319,6 +534,40 @@ const capturePhoto = () => {
 // 重新拍照
 const retakePhoto = () => {
   capturedImage.value = ''
+}
+
+const triggerFileUpload = () => {
+  fileInputRef.value?.click()
+}
+
+const handleFileUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    ElMessage.error('请选择图片文件')
+    input.value = ''
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    const result = reader.result
+    if (typeof result === 'string') {
+      capturedImage.value = result
+      ElMessage.success('图片加载成功，可直接确认录入')
+    }
+  }
+  reader.onerror = () => {
+    ElMessage.error('图片读取失败，请重试')
+  }
+  reader.readAsDataURL(file)
+
+  input.value = ''
 }
 
 // 提交注册
@@ -413,6 +662,8 @@ const checkFaceStatus = async () => {
 
 // 生命周期
 onMounted(() => {
+  refreshEnvDiagnostics()
+  refreshVideoDevices()
   checkFaceStatus()
 })
 

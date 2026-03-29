@@ -1,0 +1,68 @@
+@startuml attendance_flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 11
+skinparam activityBorderColor #888888
+skinparam activityBackgroundColor #FFFFFF
+skinparam activityDiamondBorderColor #888888
+
+title 考勤打卡业务流程图
+
+|员工|
+start
+:打开打卡页面;
+:前端摄像头采集人脸图片;
+:获取GPS坐标(经度, 纬度);
+:上传数据\nPOST /api/attendance/records/;
+
+|后端服务|
+:接收打卡请求;
+if (JWT Token是否有效?) then (无效)
+    :返回401未授权;
+    stop
+else (有效)
+endif
+
+:提取人脸128维特征向量;
+:加载用户已注册的人脸特征;
+:计算欧几里得距离;
+
+if (人脸相似度 > 0.6?) then (不匹配)
+    :返回人脸验证失败;
+    stop
+else (匹配)
+endif
+
+:获取公司位置配置\n(CompanyLocation);
+:Haversine公式计算\nGPS球面距离;
+
+if (距离 < 允许范围\n(默认200米)?) then (超出范围)
+    :返回不在打卡范围;
+    stop
+else (范围内)
+endif
+
+:获取员工工作时间表\n(WorkSchedule);
+
+if (打卡类型?) then (上班打卡)
+    if (是否晚于上班时间?) then (是)
+        :状态 = late (迟到);
+    else (否)
+        :状态 = normal (正常);
+    endif
+else (下班打卡)
+    if (是否早于下班时间?) then (是)
+        :状态 = early (早退);
+    else (否)
+        :状态 = normal (正常);
+    endif
+endif
+
+:保存打卡记录\n(AttendanceRecord);
+
+|员工|
+:显示打卡结果;
+stop
+
+@enduml

@@ -1,0 +1,69 @@
+@startuml function_modules
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 11
+skinparam packageBorderColor #666666
+skinparam packageBackgroundColor #FFFFFF
+skinparam componentBorderColor #888888
+
+title HR智慧员工运营系统 - 功能模块图
+
+package "HR智慧员工运营系统" as sys #E8EAF6 {
+
+    package "用户管理模块" as m1 #BBDEFB {
+        [用户注册与登录] as m1_1
+        [JWT认证与Token刷新] as m1_2
+        [个人信息管理] as m1_3
+        [角色权限管理] as m1_4
+        [人脸信息注册] as m1_5
+        [头像上传] as m1_6
+    }
+
+    package "考勤管理模块" as m2 #C8E6C9 {
+        [人脸识别打卡] as m2_1
+        [GPS位置验证] as m2_2
+        [打卡记录查询] as m2_3
+        [工作时间表管理] as m2_4
+        [考勤异常申请] as m2_5
+        [考勤状态判定] as m2_6
+    }
+
+    package "薪资管理模块" as m3 #FFE0B2 {
+        [薪资自动计算] as m3_1
+        [薪资记录查询] as m3_2
+        [工资单Excel导出] as m3_3
+        [薪资配置管理] as m3_4
+        [部门薪资统计] as m3_5
+    }
+
+    package "绩效管理模块" as m4 #E1BEE7 {
+        [绩效周期管理] as m4_1
+        [评估模板配置] as m4_2
+        [绩效指标管理] as m4_3
+        [绩效评估执行] as m4_4
+        [评估结果查询] as m4_5
+    }
+
+    package "请假管理模块" as m5 #B2EBF2 {
+        [请假类型管理] as m5_1
+        [请假申请提交] as m5_2
+        [请假审批] as m5_3
+        [假期余额管理] as m5_4
+    }
+
+    package "报表统计模块" as m6 #FFCDD2 {
+        [考勤统计报表] as m6_1
+        [薪资统计报表] as m6_2
+        [部门对比分析] as m6_3
+        [数据可视化图表] as m6_4
+    }
+
+    package "系统配置模块" as m7 #CFD8DC {
+        [公司位置管理] as m7_1
+        [部门组织管理] as m7_2
+        [系统参数配置] as m7_3
+    }
+}
+
+@enduml
