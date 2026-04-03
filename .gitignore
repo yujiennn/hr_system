@@ -36,9 +36,9 @@ demo_*.py
 simple_*.py
 quick_*.py
 
-# 文档和报告（除了用户手册）
+# 文档和报告（除了 README.md）
 *.md
-!用户手册.md
+!README.md
 
 # 临时文件
 *.tmp
